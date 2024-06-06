@@ -40,7 +40,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -66,6 +66,8 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.hilt.android)
+    implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.androidx.navigation.runtime.ktx)
     testImplementation(libs.junit)
     testImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.androidx.junit)
@@ -76,15 +78,15 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
-    implementation("com.google.firebase:firebase-analytics:22.0.1")
-    implementation("com.google.firebase:firebase-crashlytics:19.0.1")
-    implementation("com.google.firebase:firebase-auth:23.0.0")
-    implementation("com.google.firebase:firebase-firestore:25.0.0")
-    implementation("com.google.firebase:firebase-perf:21.0.1")
-    implementation("com.google.firebase:firebase-config:22.0.0")
-    implementation("com.google.firebase:firebase-messaging:24.0.0")
-    ksp("com.google.dagger:hilt-compiler:2.51.1")
-    kspTest("com.google.dagger:hilt-compiler:2.51.1")
-    kspAndroidTest("com.google.dagger:hilt-compiler:2.51.1")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.perf)
+    implementation(libs.firebase.config)
+    implementation(libs.firebase.messaging)
+    ksp(libs.hilt.compiler)
+    kspTest(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
 }

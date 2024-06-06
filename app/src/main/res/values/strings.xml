@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">ChatHub</string>
+    <string name="enter_email">Your Email</string>
+    <string name="enter_password">Password</string>
+    <string name="confirm_password">Confirm Password</string>
+    <string name="login">Login</string>
+    <string name="forgot_password">Forgot Password?</string>
+    <string name="login_title">Login to ChatHub</string>
+    <string name="signup">Signup</string>
+    <string name="signup_title">Enter Your Details</string>
+    <string name="create_account">Create Account</string>
+    <string name="email_error">Invalid email address</string>
+    <string name="no_account">Do not have an account? Click here</string>
+    <string name="back_button">Back</string>
+    <string name="enter_name">Your Name</string>
 </resources>
