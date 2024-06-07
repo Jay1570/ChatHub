@@ -8,7 +8,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,22 +17,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import com.example.chathub.R
 
 @Composable
 fun BasicToolBar(
     @StringRes title: Int,
     canNavigateBack: Boolean,
-    navigateUp: () -> Unit = {}
+    navigateUp: () -> Unit = {},
+    scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     CenterAlignedTopAppBar(
         title = { Text(stringResource(title), fontWeight = FontWeight.Bold) },
+        scrollBehavior = scrollBehavior,
         navigationIcon = {
             if (canNavigateBack) {
                 IconButton(onClick = navigateUp) {

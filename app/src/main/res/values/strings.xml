@@ -10,7 +10,17 @@
     <string name="signup_title">Enter Your Details</string>
     <string name="create_account">Create Account</string>
     <string name="email_error">Invalid email address</string>
+    <string name="password_error">Password must contain at least 8 characters and one lowercase, one uppercase, one number and one special character.</string>
     <string name="no_account">Do not have an account? Click here</string>
     <string name="back_button">Back</string>
     <string name="enter_name">Your Name</string>
+    <string name="generic_error">Something wrong happened. Please try again.</string>
+    <string name="empty_password_error">Password is empty</string>
+    <string name="recovery_email_sent">Check your inbox for the recovery email.</string>
+    <string name="web_client_id">212274517162-6ksb4orneh05av51m0h2ngktaeus34ik.apps.googleusercontent.com</string>
+    <string name="google_sign_in_failed">Google Sign-in Failed</string>
+    <string name="password_do_not_match">Password and Confirm Password must be same</string>
+    <string name="all_fields_required">All fields are mandatory</string>
+    <string name="account_created">Account Created Successfully</string>
+    <string name="signup_failed">Signup Failed</string>
 </resources>
