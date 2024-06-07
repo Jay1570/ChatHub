@@ -1,5 +1,6 @@
 package com.example.chathub.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,16 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -46,11 +47,10 @@ fun SignUpScreen(
     navigateUp: () -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {
+
     val uiState by viewModel.uiState
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             BasicToolBar(title = R.string.signup, canNavigateBack = true, navigateUp = navigateUp)
         }
@@ -81,13 +81,15 @@ fun SignUpScreenContent(
     modifier: Modifier = Modifier
 ) {
 
+    val enabled = !uiState.inProcess
     val fieldModifier = Modifier.fieldModifier()
 
     Box(modifier = modifier){
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .alpha(if (uiState.inProcess) 0.5f else 1f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -108,7 +110,8 @@ fun SignUpScreenContent(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
-                )
+                ),
+                enabled = enabled
             )
 
             EmailField(
@@ -118,7 +121,8 @@ fun SignUpScreenContent(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
-                )
+                ),
+                enabled = enabled
             )
 
             PasswordField(
@@ -128,7 +132,8 @@ fun SignUpScreenContent(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Next
-                )
+                ),
+                enabled = enabled
             )
 
             RepeatPasswordField(
@@ -138,7 +143,8 @@ fun SignUpScreenContent(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
-                )
+                ),
+                enabled = enabled
             )
 
             BasicButton(
@@ -146,8 +152,18 @@ fun SignUpScreenContent(
                 action = onCreateAccountClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 40.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 40.dp),
+                enabled = enabled
             )
+        }
+        if (uiState.inProcess) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
         }
     }
 }

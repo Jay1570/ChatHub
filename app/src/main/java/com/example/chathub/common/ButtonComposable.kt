@@ -15,11 +15,13 @@ import androidx.compose.ui.unit.sp
 fun BasicTextButton(
     @StringRes text: Int,
     action: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     TextButton(
         onClick = action,
-        modifier = modifier
+        modifier = modifier,
+        enabled = enabled
     ) {
         Text(text = stringResource(id = text))
     }
@@ -29,7 +31,8 @@ fun BasicTextButton(
 fun BasicButton(
     @StringRes text: Int,
     action: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     Button(
         onClick = action,
@@ -37,7 +40,8 @@ fun BasicButton(
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
-        )
+        ),
+        enabled = enabled
     ) {
         Text(text = stringResource(text), fontSize = 16.sp)
     }

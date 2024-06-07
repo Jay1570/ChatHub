@@ -22,19 +22,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
@@ -88,11 +89,9 @@ fun LoginScreen(
         }
     }
 
-    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            BasicToolBar(title = R.string.login_title, canNavigateBack = false,scrollBehavior = scrollBehavior)
+            BasicToolBar(title = R.string.login_title, canNavigateBack = false)
         }
     ) { innerPadding ->
         LoginScreenContent(
@@ -126,7 +125,6 @@ fun rememberGoogleSignInLauncher(onResult: (GoogleSignInAccount?) -> Unit): Acti
     }
 }
 
-//@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun LoginScreenContent(
     uiState: LoginUiState,
@@ -139,12 +137,14 @@ fun LoginScreenContent(
     modifier: Modifier = Modifier
 ) {
 
+    val enabled = !uiState.inProcess
     val fieldModifier = Modifier.fieldModifier()
     Box(modifier = modifier){
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState()),
+                .verticalScroll(rememberScrollState())
+                .alpha(if (uiState.inProcess) 0.5f else 1f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -154,6 +154,7 @@ fun LoginScreenContent(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp, 20.dp),
+                enabled = enabled
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.google_login),
@@ -179,7 +180,8 @@ fun LoginScreenContent(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
-                )
+                ),
+                enabled = enabled
             )
 
             PasswordField(
@@ -189,26 +191,39 @@ fun LoginScreenContent(
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Done
-                )
+                ),
+                enabled = enabled
             )
 
             BasicTextButton(
                 text = R.string.no_account,
                 action = onNoAccountClick,
-                modifier = Modifier.basicButton()
+                modifier = Modifier.basicButton(),
+                enabled = enabled
             )
 
             BasicButton(
                 text = R.string.login,
                 action = onLoginClick,
-                modifier = Modifier.basicButton()
+                modifier = Modifier.basicButton(),
+                enabled = enabled
             )
 
             BasicTextButton(
                 text = R.string.forgot_password,
                 action = onForgotPasswordClick,
-                modifier = Modifier.textButton()
+                modifier = Modifier.textButton(),
+                enabled = enabled
             )
+        }
+        if (uiState.inProcess) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.5f))
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+            }
         }
     }
 }

@@ -18,7 +18,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import com.example.chathub.R
@@ -29,7 +28,8 @@ fun BasicField(
     value: String,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         singleLine = true,
@@ -37,7 +37,8 @@ fun BasicField(
         value = value,
         onValueChange = { onNewValue(it) },
         placeholder = { Text(stringResource(text)) },
-        keyboardOptions = keyboardOptions
+        keyboardOptions = keyboardOptions,
+        enabled = enabled
     )
 }
 
@@ -46,7 +47,8 @@ fun EmailField(
     value: String,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    enabled: Boolean = true
 ) {
     OutlinedTextField(
         singleLine = true,
@@ -55,7 +57,8 @@ fun EmailField(
         onValueChange = { onNewValue(it) },
         placeholder = { Text(stringResource(id = R.string.enter_email)) },
         leadingIcon = { Icon(imageVector = Icons.Default.Email, contentDescription = "Email") },
-        keyboardOptions = keyboardOptions
+        keyboardOptions = keyboardOptions,
+        enabled = enabled
     )
 }
 
@@ -64,9 +67,10 @@ fun PasswordField(
     value: String,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    enabled: Boolean = true
 ) {
-    PasswordField(value = value, placeholder = R.string.enter_password, onNewValue = onNewValue, modifier = modifier, keyboardOptions = keyboardOptions)
+    PasswordField(value = value, placeholder = R.string.enter_password, onNewValue = onNewValue, modifier = modifier, keyboardOptions = keyboardOptions, enabled = enabled)
 }
 
 @Composable
@@ -74,9 +78,10 @@ fun RepeatPasswordField(
     value: String,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    enabled: Boolean = true
 ) {
-    PasswordField(value = value, placeholder = R.string.confirm_password, onNewValue = onNewValue, modifier = modifier, keyboardOptions = keyboardOptions)
+    PasswordField(value = value, placeholder = R.string.confirm_password, onNewValue = onNewValue, modifier = modifier, keyboardOptions = keyboardOptions, enabled = enabled)
 }
 
 @Composable
@@ -85,7 +90,8 @@ private fun PasswordField(
     @StringRes placeholder: Int,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    enabled: Boolean
 ) {
     var isVisible by remember { mutableStateOf(false) }
 
@@ -109,6 +115,7 @@ private fun PasswordField(
             }
         },
         keyboardOptions = keyboardOptions,
-        visualTransformation = visualTransformation
+        visualTransformation = visualTransformation,
+        enabled = enabled
     )
 }

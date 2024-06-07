@@ -5,8 +5,9 @@ import com.example.chathub.ChatAppViewModel
 import com.example.chathub.R
 import com.example.chathub.ext.isValidEmail
 import com.example.chathub.ext.isValidPassword
-import com.example.chathub.model.AccountService
-import com.example.chathub.model.LogService
+import com.example.chathub.model.Profile
+import com.example.chathub.model.service.AccountService
+import com.example.chathub.model.service.LogService
 import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -46,9 +47,13 @@ class LoginViewModel @Inject constructor(
             SnackbarManager.showMessage(R.string.password_error)
             return
         }
+
+        uiState.value = uiState.value.copy(inProcess = true)
         launchCatching {
             accountService.authenticate(email, password)
             openAndPopUp(DestinationScreen.ChatList.route, DestinationScreen.Login.route)
+        }.invokeOnCompletion {
+            uiState.value = uiState.value.copy(inProcess = false)
         }
     }
 
@@ -65,20 +70,19 @@ class LoginViewModel @Inject constructor(
 
     fun onGoogleLoginClick(account: GoogleSignInAccount, openAndPopUp: (String, String) -> Unit) {
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+
+        uiState.value = uiState.value.copy(inProcess = true)
         launchCatching {
             accountService.googleSignIn(credential)
             val name = account.displayName ?: ""
             val email = account.email ?: ""
-            val profilePicture = account.photoUrl.toString()
+            val profilePicture = account.photoUrl?.toString() ?: ""
 
-            uiState.value = uiState.value.copy(
-                email = email,
-                name = name,
-                profilePicture = profilePicture
-            )
+            accountService.storeOrUpdateProfile(Profile(name = name, email =  email, imageUrl =  profilePicture))
 
-            // Navigate to chat list after successful login
             openAndPopUp(DestinationScreen.ChatList.route, DestinationScreen.Login.route)
+        }.invokeOnCompletion {
+            uiState.value = uiState.value.copy(inProcess = false)
         }
     }
 }
@@ -87,5 +91,6 @@ data class LoginUiState(
     val email: String = "",
     val name: String = "",
     val password: String = "",
-    val profilePicture: String = ""
+    val profilePicture: String = "",
+    val inProcess: Boolean = false
 )

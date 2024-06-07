@@ -2,7 +2,7 @@ package com.example.chathub
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.chathub.model.LogService
+import com.example.chathub.model.service.LogService
 import com.example.chathub.snackbar.SnackbarManager
 import com.example.chathub.snackbar.SnackbarMessage.Companion.toSnackbarMessage
 import kotlinx.coroutines.CoroutineExceptionHandler
