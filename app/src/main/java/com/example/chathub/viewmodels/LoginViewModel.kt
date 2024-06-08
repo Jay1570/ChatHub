@@ -69,16 +69,16 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onGoogleLoginClick(account: GoogleSignInAccount, openAndPopUp: (String, String) -> Unit) {
+        uiState.value = uiState.value.copy(inProcess = true)
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
 
-        uiState.value = uiState.value.copy(inProcess = true)
         launchCatching {
             accountService.googleSignIn(credential)
             val name = account.displayName ?: ""
             val email = account.email ?: ""
-            val profilePicture = account.photoUrl?.toString() ?: ""
+            val imageUrl = account.photoUrl?.toString() ?: "android.resource://com.example.chathub/drawable/user"
 
-            accountService.storeOrUpdateProfile(Profile(name = name, email =  email, imageUrl =  profilePicture))
+            accountService.storeOrUpdateProfile(Profile(name = name, email =  email, imageUrl =  imageUrl))
 
             openAndPopUp(DestinationScreen.ChatList.route, DestinationScreen.Login.route)
         }.invokeOnCompletion {

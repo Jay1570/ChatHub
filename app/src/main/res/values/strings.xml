@@ -22,5 +22,7 @@
     <string name="password_do_not_match">Password and Confirm Password must be same</string>
     <string name="all_fields_required">All fields are mandatory</string>
     <string name="account_created">Account Created Successfully</string>
-    <string name="signup_failed">Signup Failed</string>
+    <string name="signup_failed">Signup Failed</string>\
+    <string name="chat_list_error">Failed to fetch chat list. Please try again later.</string>
+    <string name="user_list_error">Failed to fetch chat list. Please try again later.</string>
 </resources>

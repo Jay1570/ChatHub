@@ -30,7 +30,9 @@ fun Navigation(
             )
         }
         composable(route = DestinationScreen.ChatList.route) {
-            ChatListScreen()
+            ChatListScreen(
+                openScreen = { /*TODO*/ }
+            )
         }
     }
 }

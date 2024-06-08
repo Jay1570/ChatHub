@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.example.chathub.common
 
 import androidx.annotation.DrawableRes
@@ -25,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.chathub.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicToolBar(
     @StringRes title: Int,
@@ -47,6 +46,8 @@ fun BasicToolBar(
         colors = toolbarColor()
     )
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionToolBar(
     @StringRes title: Int,
@@ -67,8 +68,11 @@ fun ActionToolBar(
     )
 }
 
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun toolbarColor(darkTheme: Boolean = isSystemInDarkTheme()): TopAppBarColors {
+fun toolbarColor(darkTheme: Boolean = isSystemInDarkTheme()): TopAppBarColors {
     return if (darkTheme) TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
     else TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
 }

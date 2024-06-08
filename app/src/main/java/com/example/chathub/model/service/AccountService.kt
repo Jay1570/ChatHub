@@ -14,14 +14,26 @@ class AccountService @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
-    private val currentUserId: String
+    val currentUserId: String
         get() = auth.currentUser?.uid.orEmpty()
+
+    suspend fun getProfile(userId: String): Profile? {
+        return try {
+            val profileDoc = firestore.collection(PROFILE_COLLECTION).document(userId).get().await()
+            if (profileDoc.exists()) {
+                val profileData = profileDoc.toObject(Profile::class.java)
+                profileData?.copy(userId = profileDoc.id)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("AccountService", "Error getting profile", e)
+            null
+        }
+    }
 
     val hasUser: Boolean
         get() = auth.currentUser != null
-
-    private val collection get() = firestore.collection(PROFILE_COLLECTION)
-        .whereEqualTo(USER_ID_FIELD, currentUserId)
 
     suspend fun update(profile: Profile): Unit =
     trace(UPDATE_PROFILE_TRACE) {
