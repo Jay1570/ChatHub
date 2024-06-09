@@ -76,7 +76,7 @@ class LoginViewModel @Inject constructor(
             accountService.googleSignIn(credential)
             val name = account.displayName ?: ""
             val email = account.email ?: ""
-            val imageUrl = account.photoUrl?.toString() ?: "android.resource://com.example.chathub/drawable/user"
+            val imageUrl = account.photoUrl?.toString() ?: ""
 
             accountService.storeOrUpdateProfile(Profile(name = name, email =  email, imageUrl =  imageUrl))
 

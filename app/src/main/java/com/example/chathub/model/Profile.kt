@@ -1,10 +1,13 @@
 package com.example.chathub.model
 
+import com.google.firebase.firestore.DocumentId
+
 data class Profile(
+    @DocumentId val id: String = "",
     val userId: String = "",
     val email: String? = "",
     val name: String? = "",
-    val imageUrl: String = "https://firebasestorage.googleapis.com/v0/b/chathub-cc672.appspot.com/o/icons8-user-50.png?alt=media&token=7ae8302b-538b-41c6-8f58-fe25a90f35a4",
+    val imageUrl: String = "",
     val statusMessage: String = "Busy",
 ) {
     fun toMap() = mapOf(
@@ -13,4 +16,11 @@ data class Profile(
         "name" to name,
         "imageUrl" to imageUrl
     )
+    fun toChatUser(): ChatUser =
+        ChatUser(
+            userId = userId,
+            email = email ?: "",
+            name = name ?: "",
+            imageUrl = imageUrl
+        )
 }

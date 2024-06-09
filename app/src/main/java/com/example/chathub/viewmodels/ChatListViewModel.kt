@@ -5,11 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
 import com.example.chathub.R
-import com.example.chathub.model.Chat
 import com.example.chathub.model.ChatUser
 import com.example.chathub.model.service.AccountService
 import com.example.chathub.model.service.ChatService
 import com.example.chathub.model.service.LogService
+import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,23 +24,34 @@ class ChatListViewModel @Inject constructor(
     logService: LogService
 ) : ChatAppViewModel(logService) {
 
-    private val _chatList = MutableStateFlow<List<Chat>>(emptyList())
-    val chatList: StateFlow<List<Chat>> get() = _chatList
+    val chatList = chatService.chatList
 
     private val _userList = MutableStateFlow<List<ChatUser>>(emptyList())
     val userList: StateFlow<List<ChatUser>> get() = _userList
 
     var uiState = mutableStateOf(ChatListUiState())
+        private set
+
+    private val query:String get() = uiState.value.query
+
 
     init {
-        fetchChatList()
+        uiState.value  = uiState.value.copy(currentUserId = accountService.currentUserId)
+        viewModelScope.launch {
+            chatList.collect { fetchedTasks ->
+                Log.d("TasksViewModel", "Loaded tasks: ${fetchedTasks.size}")
+            }
+        }
     }
 
     fun onSearchClick() {
+        _userList.value = emptyList()
         uiState.value = uiState.value.copy(isSearchBarVisible = !uiState.value.isSearchBarVisible)
+        uiState.value = uiState.value.copy(query = "")
     }
 
-    fun onSearch(query: String) {
+    fun onSearch(newValue: String) {
+        uiState.value = uiState.value.copy(query = newValue)
         if (query == "") {
             _userList.value = emptyList()
             return
@@ -55,21 +66,16 @@ class ChatListViewModel @Inject constructor(
         }
     }
 
-    private fun fetchChatList() {
-        uiState.value = uiState.value.copy(currentUserId = accountService.currentUserId)
-        viewModelScope.launch {
-            try {
-                val chats = chatService.fetchChats()
-                _chatList.value = chats
-            } catch (e: Exception) {
-                Log.e("ChatListViewModel", e.toString())
-                SnackbarManager.showMessage(R.string.chat_list_error)
-            }
-        }
+    fun onUserClick(user: ChatUser, openScreen: (String) -> Unit) {
+        viewModelScope.launch{
+            val chat = chatService.createChat(user)
+            openScreen(DestinationScreen.Chat.createRoute(chat?.chatId))
+        }.invokeOnCompletion { uiState.value = uiState.value.copy(isSearchBarVisible = false) }
     }
 }
 
 data class ChatListUiState(
+    val query: String = "",
     val currentUserId: String = "",
     val isSearchBarVisible: Boolean = false
 )

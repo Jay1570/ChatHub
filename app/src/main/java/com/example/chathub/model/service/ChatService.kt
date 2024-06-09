@@ -1,9 +1,15 @@
 package com.example.chathub.model.service
 
-import com.example.chathub.model.Chat
+import android.util.Log
+import com.example.chathub.model.ChatList
 import com.example.chathub.model.ChatUser
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.snapshots
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -11,21 +17,75 @@ class ChatService @Inject constructor(
     private val firestore: FirebaseFirestore,
     private val auth: AccountService
 ) {
-    suspend fun fetchChats(): List<Chat> {
-        val currentUserId = auth.currentUserId
-        val chatSnapshot = firestore.collection(CHAT_COLLECTION)
-            .where(
-                Filter.or(
-                    Filter.equalTo("user1.userId", currentUserId),
-                    Filter.equalTo("user2.userId", currentUserId)
-                )
-            )
-            .get()
-            .await()
 
-        return chatSnapshot.documents.mapNotNull { document ->
-            document.toObject(Chat::class.java)
+    val currentUserId = auth.currentUserId
+
+    val chatList: Flow<List<ChatList>> =
+        auth.currentUser.flatMapLatest { user ->
+            firestore.collection(CHAT_LIST_COLLECTION)
+                .where(
+                    Filter.or(
+                        Filter.equalTo("user1.userId", currentUserId),
+                        Filter.equalTo("user2.userId", currentUserId)
+                    )
+                )
+                .snapshots()
+                .map { snapshot->
+                    snapshot.toObjects(ChatList::class.java)
+                }
+                .catch {e ->
+                    Log.e("ChatService", "Error fetching chats", e)
+                    emit(emptyList())
+                }
         }
+
+    suspend fun createChat(user2: ChatUser): ChatList? {
+        try {
+
+            val existingChat = fetchChatByUser(user2.userId)
+            val currentProfile = auth.getCurrentProfile(currentUserId)?.toChatUser() ?: ChatUser()
+            if (existingChat != null) {
+                return existingChat
+            }
+
+            val newChatDocRef = firestore.collection(CHAT_LIST_COLLECTION).document()
+            val newChat = ChatList(chatId = newChatDocRef.id, user1 = currentProfile, user2 = user2)
+
+            newChatDocRef.set(newChat).await()
+
+            return newChat
+        } catch (e: Exception) {
+            Log.e("ChatService", "Error creating chat", e)
+            return null
+        }
+    }
+
+    suspend fun fetchChatByUser(user2Id: String): ChatList? {
+        try {
+            val querySnapshot1 = firestore.collection(CHAT_LIST_COLLECTION)
+                .whereEqualTo("user1.userId", currentUserId)
+                .whereEqualTo("user2.userId", user2Id)
+                .get()
+                .await()
+
+            val querySnapshot2 = firestore.collection(CHAT_LIST_COLLECTION)
+                .whereEqualTo("user1.userId", user2Id)
+                .whereEqualTo("user2.userId", currentUserId)
+                .get()
+                .await()
+
+
+            if (!querySnapshot1.isEmpty) {
+
+                return querySnapshot1.documents[0].toObject(ChatList::class.java)
+            }
+            if (!querySnapshot2.isEmpty) {
+                return querySnapshot2.documents[0].toObject(ChatList::class.java)
+            }
+        } catch (e: Exception) {
+            Log.e("ChatService", "Error finding chat by users", e)
+        }
+        return null
     }
 
     suspend fun fetchUsersByNameAndEmail(query: String): List<ChatUser>{
@@ -54,7 +114,7 @@ class ChatService @Inject constructor(
     }
 
     companion object {
-        private const val CHAT_COLLECTION = "chatList"
+        private const val CHAT_LIST_COLLECTION = "chatList"
         private const val PROFILE_COLLECTION = "profiles"
     }
 }

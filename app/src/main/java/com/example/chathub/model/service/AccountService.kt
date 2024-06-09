@@ -7,6 +7,9 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -17,12 +20,21 @@ class AccountService @Inject constructor(
     val currentUserId: String
         get() = auth.currentUser?.uid.orEmpty()
 
-    suspend fun getProfile(userId: String): Profile? {
+    val currentUser: Flow<Profile>
+        get() = callbackFlow {
+            val listener = FirebaseAuth.AuthStateListener { auth ->
+                this.trySend(auth.currentUser?.let { Profile(it.uid) } ?: Profile())
+            }
+            auth.addAuthStateListener(listener)
+            awaitClose { auth.removeAuthStateListener(listener) }
+        }
+
+    suspend fun getCurrentProfile(userId: String = currentUserId): Profile? {
         return try {
             val profileDoc = firestore.collection(PROFILE_COLLECTION).document(userId).get().await()
             if (profileDoc.exists()) {
                 val profileData = profileDoc.toObject(Profile::class.java)
-                profileData?.copy(userId = profileDoc.id)
+                profileData?.copy(id = profileDoc.id)
             } else {
                 null
             }

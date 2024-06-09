@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -30,28 +30,31 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.example.chathub.R
 import com.example.chathub.ext.toolbarActions
-import com.example.chathub.model.Chat
+import com.example.chathub.model.ChatList
 import com.example.chathub.model.ChatUser
 import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.viewmodels.ChatListUiState
@@ -62,8 +65,8 @@ fun ChatListScreen(
     openScreen: (String) -> Unit,
     viewModel: ChatListViewModel = hiltViewModel()
 ) {
-
-    val chatList by viewModel.chatList.collectAsState()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val chatList = viewModel.chatList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
     val userList by viewModel.userList.collectAsState()
 
     val uiState by viewModel.uiState
@@ -80,8 +83,9 @@ fun ChatListScreen(
         if(!uiState.isSearchBarVisible){
             ChatListContent(
                 uiState = uiState,
-                chatList = chatList,
-                onClick = { },
+                chatList = chatList.value,
+                onChatClick = { },
+                openScreen = openScreen,
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
@@ -90,7 +94,8 @@ fun ChatListScreen(
             ChatListContent(
                 uiState = uiState,
                 userList = userList,
-                onClick = { },
+                onUserClick = viewModel::onUserClick,
+                openScreen = openScreen,
                 modifier = Modifier
                     .padding(innerPadding)
                     .fillMaxSize()
@@ -102,10 +107,12 @@ fun ChatListScreen(
 @Composable
 fun ChatListContent(
     uiState: ChatListUiState,
-    onClick: () -> Unit,
+    openScreen: (String) -> Unit,
     modifier: Modifier = Modifier,
     userList: List<ChatUser> = emptyList(),
-    chatList: List<Chat> = emptyList()
+    chatList: List<ChatList> = emptyList(),
+    onChatClick: () -> Unit = {},
+    onUserClick: (ChatUser, (String) -> Unit) -> Unit = {_,_ ->},
 ) {
     Box(modifier = modifier) {
         if(!uiState.isSearchBarVisible){
@@ -113,7 +120,7 @@ fun ChatListContent(
                 items(chatList) { chat ->
                     ChatListItem(
                         chat = if (chat.user1.userId != uiState.currentUserId) chat.user1 else chat.user2,
-                        onClick = onClick
+                        openScreen = openScreen
                     )
                 }
             }
@@ -123,7 +130,8 @@ fun ChatListContent(
                     if (chat.userId != uiState.currentUserId) {
                         ChatListItem(
                             chat = chat,
-                            onClick = onClick
+                            onUserClick = onUserClick,
+                            openScreen = openScreen
                         )
                     }
                 }
@@ -133,11 +141,11 @@ fun ChatListContent(
 }
 
 @Composable
-fun ChatListItem(chat: ChatUser, onClick: () -> Unit) {
+fun ChatListItem(chat: ChatUser, openScreen: (String) -> Unit, onUserClick: (ChatUser, (String) -> Unit) -> Unit = {_,_ ->}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .clickable(onClick = { onUserClick(chat, openScreen) })
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -153,10 +161,21 @@ fun ChatListItem(chat: ChatUser, onClick: () -> Unit) {
 @Composable
 fun ProfileImage(imageUrl: String) {
     val painter = rememberAsyncImagePainter(
-        ImageRequest.Builder(LocalContext.current).data(data = imageUrl )
-            .apply(block = fun ImageRequest.Builder.() {
-                transformations(CircleCropTransformation())
-            }).build()
+        when (imageUrl == "") {
+            true -> ImageRequest.Builder(LocalContext.current)
+                .placeholder(R.drawable.user)
+                .apply(block = fun ImageRequest.Builder.() {
+                    transformations(CircleCropTransformation())
+                })
+                .build()
+            false -> ImageRequest.Builder(LocalContext.current)
+                .placeholder(R.drawable.user)
+                .data(data = imageUrl)
+                .apply(block = fun ImageRequest.Builder.() {
+                    transformations(CircleCropTransformation())
+                })
+                .build()
+        }
     )
     Image(
         painter = painter,
@@ -167,38 +186,46 @@ fun ProfileImage(imageUrl: String) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
+    uiState: ChatListUiState,
     modifier: Modifier = Modifier,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onCloseClick: () -> Unit
 ) {
-    var query by rememberSaveable { mutableStateOf("") }
+    val focusRequester = remember { FocusRequester() }
     TextField(
-        value = query,
-        onValueChange = {
-            query = it
-            onSearch(query)
-        },
+        value = uiState.query,
+        onValueChange = { onSearch(it) },
         placeholder = { Text(text = "Search") },
         trailingIcon = {
-            IconButton(onClick = { onSearch(query)  }) {
+            IconButton(onClick = onCloseClick) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    imageVector = Icons.Filled.Close,
                     contentDescription = "Search"
                 )
             }
         },
-        modifier = modifier.clip(RoundedCornerShape(50.dp)),
-        colors = TextFieldDefaults.textFieldColors(
+        modifier = modifier
+            .clip(RoundedCornerShape(50.dp))
+            .focusRequester(focusRequester),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
             focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            errorIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
+            unfocusedContainerColor = Color.White,
+            focusedTextColor = Color.Black,
+            unfocusedTextColor = Color.Black
         ),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Search
         )
     )
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -238,7 +265,9 @@ private fun AppBar(
             )
             if (uiState.isSearchBarVisible) {
                 SearchBar(
+                    uiState = uiState,
                     onSearch = onSearch,
+                    onCloseClick = onSearchClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
@@ -252,28 +281,28 @@ private fun AppBar(
 @Composable
 fun ChatListScreenPreview() {
     val chatList = listOf(
-        Chat(
+        ChatList(
             chatId = "",
             user2 =  ChatUser(
                 name = "Jay",
                 email = "jay@test.com",
-                imageUrl = "https://github.com/Jay1570/ChatHub/blob/Jay1570-user-png/user.png"
+                imageUrl = ""
             )
         ),
-        Chat(
+        ChatList(
             chatId = "",
             user2 =  ChatUser(
                 name = "Jay",
                 email = "jay@test.com",
-                imageUrl = "https://firebasestorage.googleapis.com/v0/b/chathub-cc672.appspot.com/o/icons8-user-50.png?alt=media&token=7ae8302b-538b-41c6-8f58-fe25a90f35a4"
+                imageUrl = ""
             )
         )
     )
     ChatHubTheme {
         ChatListContent(
             chatList = chatList,
-            onClick = {},
-            uiState = ChatListUiState()
+            uiState = ChatListUiState(),
+            openScreen = {}
         )
     }
 }
@@ -282,20 +311,35 @@ fun ChatListScreenPreview() {
 @Composable
 fun ChatListScreenDarkPreview() {
     val chatList = listOf(
-        Chat(
+        ChatList(
             chatId = "",
             user2 =  ChatUser(
                 name = "Jay",
                 email = "jay@test.com",
-                imageUrl = "https://firebasestorage.googleapis.com/v0/b/chathub-cc672.appspot.com/o/icons8-user-50.png?alt=media&token=7ae8302b-538b-41c6-8f58-fe25a90f35a4"
+                imageUrl = ""
             )
         )
     )
     ChatHubTheme(darkTheme = true) {
         ChatListContent(
             chatList = chatList,
-            onClick = {},
-            uiState = ChatListUiState()
+            uiState = ChatListUiState(),
+            openScreen = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SearchBarPreview() {
+    ChatHubTheme {
+        SearchBar(
+            uiState = ChatListUiState(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            onSearch = {},
+            onCloseClick = {},
         )
     }
 }

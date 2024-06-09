@@ -4,8 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.chathub.ApplicationState
 import com.example.chathub.screens.ChatListScreen
+import com.example.chathub.screens.ChatScreen
 import com.example.chathub.screens.LoginScreen
 import com.example.chathub.screens.SignUpScreen
 import com.example.chathub.viewmodels.NavigationViewModel
@@ -31,8 +33,17 @@ fun Navigation(
         }
         composable(route = DestinationScreen.ChatList.route) {
             ChatListScreen(
-                openScreen = { /*TODO*/ }
+                openScreen = { route -> appState.navigate(route) }
             )
+        }
+        composable(
+            route = DestinationScreen.Chat.route,
+            arguments = listOf(navArgument("chatId") {
+                nullable = true
+                defaultValue = null
+            })
+        ) {
+            ChatScreen()
         }
     }
 }

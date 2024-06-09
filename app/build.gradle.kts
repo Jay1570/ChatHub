@@ -72,6 +72,8 @@ dependencies {
     implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.play.services.auth)
     implementation(libs.coil.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
     testImplementation(libs.junit)
     testImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.androidx.junit)
