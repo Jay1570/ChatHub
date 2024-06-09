@@ -2,7 +2,7 @@ package com.example.chathub.model.service
 
 import android.util.Log
 import com.example.chathub.model.ChatList
-import com.example.chathub.model.ChatUser
+import com.example.chathub.model.Profile
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.snapshots
@@ -18,6 +18,9 @@ class ChatService @Inject constructor(
     private val auth: AccountService
 ) {
 
+    val chatListCollection = firestore.collection("chatList")
+    val profileCollection = firestore.collection("profiles")
+
     val currentUserId = auth.currentUserId
 
     val chatList: Flow<List<ChatList>> =
@@ -25,31 +28,29 @@ class ChatService @Inject constructor(
             firestore.collection(CHAT_LIST_COLLECTION)
                 .where(
                     Filter.or(
-                        Filter.equalTo("user1.userId", currentUserId),
-                        Filter.equalTo("user2.userId", currentUserId)
+                        Filter.equalTo("user1Id", currentUserId),
+                        Filter.equalTo("user2Id", currentUserId)
                     )
                 )
                 .snapshots()
-                .map { snapshot->
+                .map { snapshot ->
                     snapshot.toObjects(ChatList::class.java)
                 }
-                .catch {e ->
+                .catch { e ->
                     Log.e("ChatService", "Error fetching chats", e)
                     emit(emptyList())
                 }
         }
 
-    suspend fun createChat(user2: ChatUser): ChatList? {
+    suspend fun createChat(user2Id: String): ChatList? {
         try {
-
-            val existingChat = fetchChatByUser(user2.userId)
-            val currentProfile = auth.getCurrentProfile(currentUserId)?.toChatUser() ?: ChatUser()
+            val existingChat = fetchChatByUser(user2Id)
             if (existingChat != null) {
                 return existingChat
             }
 
             val newChatDocRef = firestore.collection(CHAT_LIST_COLLECTION).document()
-            val newChat = ChatList(chatId = newChatDocRef.id, user1 = currentProfile, user2 = user2)
+            val newChat = ChatList(chatId = newChatDocRef.id, user1Id = currentUserId, user2Id = user2Id)
 
             newChatDocRef.set(newChat).await()
 
@@ -60,17 +61,17 @@ class ChatService @Inject constructor(
         }
     }
 
-    suspend fun fetchChatByUser(user2Id: String): ChatList? {
+    private suspend fun fetchChatByUser(user2Id: String): ChatList? {
         try {
             val querySnapshot1 = firestore.collection(CHAT_LIST_COLLECTION)
-                .whereEqualTo("user1.userId", currentUserId)
-                .whereEqualTo("user2.userId", user2Id)
+                .whereEqualTo("user1Id", currentUserId)
+                .whereEqualTo("user2Id", user2Id)
                 .get()
                 .await()
 
             val querySnapshot2 = firestore.collection(CHAT_LIST_COLLECTION)
-                .whereEqualTo("user1.userId", user2Id)
-                .whereEqualTo("user2.userId", currentUserId)
+                .whereEqualTo("user1Id", user2Id)
+                .whereEqualTo("user2Id", currentUserId)
                 .get()
                 .await()
 
@@ -88,7 +89,7 @@ class ChatService @Inject constructor(
         return null
     }
 
-    suspend fun fetchUsersByNameAndEmail(query: String): List<ChatUser>{
+    suspend fun fetchUsersByNameAndEmail(query: String): List<Profile>{
         val usersByNameSnapshot = firestore.collection(PROFILE_COLLECTION)
             .whereGreaterThanOrEqualTo("name", query)
             .whereLessThanOrEqualTo("name", query + '\uf8ff')
@@ -102,14 +103,12 @@ class ChatService @Inject constructor(
             .await()
 
         val usersByName = usersByNameSnapshot.documents.mapNotNull { document ->
-            document.toObject(ChatUser::class.java)
+            document.toObject(Profile::class.java)
         }
 
         val usersByEmail = usersByEmailSnapshot.documents.mapNotNull { document ->
-            document.toObject(ChatUser::class.java)
+            document.toObject(Profile::class.java)
         }
-
-        // Combine the results and remove duplicates
         return (usersByName + usersByEmail).distinctBy { it.userId }
     }
 

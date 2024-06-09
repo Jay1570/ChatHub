@@ -5,7 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
 import com.example.chathub.R
-import com.example.chathub.model.ChatUser
+import com.example.chathub.model.Profile
 import com.example.chathub.model.service.AccountService
 import com.example.chathub.model.service.ChatService
 import com.example.chathub.model.service.LogService
@@ -26,8 +26,11 @@ class ChatListViewModel @Inject constructor(
 
     val chatList = chatService.chatList
 
-    private val _userList = MutableStateFlow<List<ChatUser>>(emptyList())
-    val userList: StateFlow<List<ChatUser>> get() = _userList
+    private val _userList = MutableStateFlow<List<Profile>>(emptyList())
+    val userList: StateFlow<List<Profile>> get() = _userList
+
+    private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
+    val profiles: StateFlow<List<Profile>> get() = _profiles
 
     var uiState = mutableStateOf(ChatListUiState())
         private set
@@ -38,8 +41,11 @@ class ChatListViewModel @Inject constructor(
     init {
         uiState.value  = uiState.value.copy(currentUserId = accountService.currentUserId)
         viewModelScope.launch {
-            chatList.collect { fetchedTasks ->
-                Log.d("TasksViewModel", "Loaded tasks: ${fetchedTasks.size}")
+            chatList.collect { chats ->
+                val profiles = accountService.fetchProfilesForChats(chats)
+                _profiles.value = profiles
+                Log.d("ChatListViewModel", "Loaded chats: ${chats.size}")
+                Log.d("ChatListViewModel", "Loaded profiles: ${_profiles.value.size}")
             }
         }
     }
@@ -66,9 +72,9 @@ class ChatListViewModel @Inject constructor(
         }
     }
 
-    fun onUserClick(user: ChatUser, openScreen: (String) -> Unit) {
+    fun onUserClick(userId: String, openScreen: (String) -> Unit) {
         viewModelScope.launch{
-            val chat = chatService.createChat(user)
+            val chat = chatService.createChat(userId)
             openScreen(DestinationScreen.Chat.createRoute(chat?.chatId))
         }.invokeOnCompletion { uiState.value = uiState.value.copy(isSearchBarVisible = false) }
     }

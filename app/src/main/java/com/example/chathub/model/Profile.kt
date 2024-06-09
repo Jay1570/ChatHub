@@ -5,8 +5,8 @@ import com.google.firebase.firestore.DocumentId
 data class Profile(
     @DocumentId val id: String = "",
     val userId: String = "",
-    val email: String? = "",
-    val name: String? = "",
+    val email: String = "",
+    val name: String = "",
     val imageUrl: String = "",
     val statusMessage: String = "Busy",
 ) {
@@ -16,11 +16,4 @@ data class Profile(
         "name" to name,
         "imageUrl" to imageUrl
     )
-    fun toChatUser(): ChatUser =
-        ChatUser(
-            userId = userId,
-            email = email ?: "",
-            name = name ?: "",
-            imageUrl = imageUrl
-        )
 }

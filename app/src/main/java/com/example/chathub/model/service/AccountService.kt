@@ -1,13 +1,17 @@
 package com.example.chathub.model.service
 
 import android.util.Log
+import com.example.chathub.model.ChatList
 import com.example.chathub.model.Profile
 import com.example.chathub.model.trace
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
@@ -29,7 +33,7 @@ class AccountService @Inject constructor(
             awaitClose { auth.removeAuthStateListener(listener) }
         }
 
-    suspend fun getCurrentProfile(userId: String = currentUserId): Profile? {
+    suspend fun getProfile(userId: String = currentUserId): Profile? {
         return try {
             val profileDoc = firestore.collection(PROFILE_COLLECTION).document(userId).get().await()
             if (profileDoc.exists()) {
@@ -42,6 +46,16 @@ class AccountService @Inject constructor(
             Log.e("AccountService", "Error getting profile", e)
             null
         }
+    }
+
+    suspend fun fetchProfilesForChats(chats: List<ChatList>): List<Profile> = coroutineScope{
+        val uniqueUserIds = chats.flatMap { listOf(it.user1Id, it.user2Id) }.distinct()
+        val profilesDeferred = uniqueUserIds.map { userId ->
+            async(Dispatchers.IO) {
+                getProfile(userId) ?: Profile() // Return empty profile if not found
+            }
+        }
+        profilesDeferred.map { it.await() }
     }
 
     val hasUser: Boolean

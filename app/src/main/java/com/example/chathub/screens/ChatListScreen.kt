@@ -31,7 +31,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -55,7 +54,7 @@ import coil.transform.CircleCropTransformation
 import com.example.chathub.R
 import com.example.chathub.ext.toolbarActions
 import com.example.chathub.model.ChatList
-import com.example.chathub.model.ChatUser
+import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.viewmodels.ChatListUiState
 import com.example.chathub.viewmodels.ChatListViewModel
@@ -67,7 +66,8 @@ fun ChatListScreen(
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val chatList = viewModel.chatList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
-    val userList by viewModel.userList.collectAsState()
+    val userList by viewModel.userList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
+    val profile by viewModel.profiles.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
 
     val uiState by viewModel.uiState
     Scaffold(
@@ -85,6 +85,7 @@ fun ChatListScreen(
                 uiState = uiState,
                 chatList = chatList.value,
                 onChatClick = { },
+                profile = profile,
                 openScreen = openScreen,
                 modifier = Modifier
                     .padding(innerPadding)
@@ -109,17 +110,21 @@ fun ChatListContent(
     uiState: ChatListUiState,
     openScreen: (String) -> Unit,
     modifier: Modifier = Modifier,
-    userList: List<ChatUser> = emptyList(),
+    userList: List<Profile> = emptyList(),
     chatList: List<ChatList> = emptyList(),
     onChatClick: () -> Unit = {},
-    onUserClick: (ChatUser, (String) -> Unit) -> Unit = {_,_ ->},
+    profile: List<Profile> = emptyList(),
+    onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
 ) {
     Box(modifier = modifier) {
         if(!uiState.isSearchBarVisible){
             LazyColumn {
                 items(chatList) { chat ->
+                    val profiles =
+                        if (chat.user1Id != uiState.currentUserId) profile.find { it.userId == chat.user1Id } ?: Profile()
+                        else profile.find { it.userId == chat.user2Id } ?: Profile()
                     ChatListItem(
-                        chat = if (chat.user1.userId != uiState.currentUserId) chat.user1 else chat.user2,
+                        chat = profiles,
                         openScreen = openScreen
                     )
                 }
@@ -141,11 +146,11 @@ fun ChatListContent(
 }
 
 @Composable
-fun ChatListItem(chat: ChatUser, openScreen: (String) -> Unit, onUserClick: (ChatUser, (String) -> Unit) -> Unit = {_,_ ->}) {
+fun ChatListItem(chat: Profile, openScreen: (String) -> Unit, onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onUserClick(chat, openScreen) })
+            .clickable(onClick = { onUserClick(chat.userId, openScreen) })
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -283,26 +288,20 @@ fun ChatListScreenPreview() {
     val chatList = listOf(
         ChatList(
             chatId = "",
-            user2 =  ChatUser(
-                name = "Jay",
-                email = "jay@test.com",
-                imageUrl = ""
-            )
+            user1Id = "",
+            user2Id = ""
         ),
         ChatList(
             chatId = "",
-            user2 =  ChatUser(
-                name = "Jay",
-                email = "jay@test.com",
-                imageUrl = ""
-            )
+            user1Id = "",
+            user2Id = ""
         )
     )
     ChatHubTheme {
         ChatListContent(
             chatList = chatList,
             uiState = ChatListUiState(),
-            openScreen = {}
+            openScreen = {},
         )
     }
 }
@@ -313,18 +312,15 @@ fun ChatListScreenDarkPreview() {
     val chatList = listOf(
         ChatList(
             chatId = "",
-            user2 =  ChatUser(
-                name = "Jay",
-                email = "jay@test.com",
-                imageUrl = ""
-            )
+            user1Id = "",
+            user2Id = ""
         )
     )
     ChatHubTheme(darkTheme = true) {
         ChatListContent(
             chatList = chatList,
             uiState = ChatListUiState(),
-            openScreen = {}
+            openScreen = {},
         )
     }
 }

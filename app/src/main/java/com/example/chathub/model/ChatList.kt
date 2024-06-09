@@ -4,13 +4,6 @@ import com.google.firebase.firestore.DocumentId
 
 data class ChatList(
     @DocumentId val chatId: String = "",
-    val user1: ChatUser = ChatUser(),
-    val user2: ChatUser = ChatUser(),
-)
-
-data class ChatUser(
-    val userId: String = "",
-    val email: String = "",
-    val name: String = "",
-    val imageUrl: String = ""
+    val user1Id: String = "",
+    val user2Id: String= "",
 )
