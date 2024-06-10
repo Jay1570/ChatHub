@@ -12,4 +12,5 @@ sealed class DestinationScreen(var route: String) {
     object Status: DestinationScreen("status/{userId}") {
         fun createRoute(id: String) = "chat/$id"
     }
+    object Settings: DestinationScreen("settings")
 }

@@ -39,18 +39,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
+import coil.compose.AsyncImage
 import com.example.chathub.R
 import com.example.chathub.ext.toolbarActions
 import com.example.chathub.model.ChatList
@@ -75,7 +74,7 @@ fun ChatListScreen(
             AppBar(
                 uiState = uiState,
                 onSearch = viewModel::onSearch,
-                onSettingsClick = { /*TODO*/ },
+                onSettingsClick = { viewModel.onSettingsClick(openScreen) },
                 onSearchClick = viewModel::onSearchClick
             )
         }
@@ -84,7 +83,7 @@ fun ChatListScreen(
             ChatListContent(
                 uiState = uiState,
                 chatList = chatList.value,
-                onChatClick = { },
+                onChatClick = viewModel::onChatClick,
                 profile = profile,
                 openScreen = openScreen,
                 modifier = Modifier
@@ -112,7 +111,7 @@ fun ChatListContent(
     modifier: Modifier = Modifier,
     userList: List<Profile> = emptyList(),
     chatList: List<ChatList> = emptyList(),
-    onChatClick: () -> Unit = {},
+    onChatClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
     profile: List<Profile> = emptyList(),
     onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
 ) {
@@ -124,17 +123,21 @@ fun ChatListContent(
                         if (chat.user1Id != uiState.currentUserId) profile.find { it.userId == chat.user1Id } ?: Profile()
                         else profile.find { it.userId == chat.user2Id } ?: Profile()
                     ChatListItem(
-                        chat = profiles,
+                        uiState = uiState,
+                        chatId = chat.chatId,
+                        onChatClick = onChatClick,
+                        profile = profiles,
                         openScreen = openScreen
                     )
                 }
             }
         } else {
             LazyColumn {
-                items(userList) { chat ->
-                    if (chat.userId != uiState.currentUserId) {
+                items(userList) { profiles ->
+                    if (profiles.userId != uiState.currentUserId) {
                         ChatListItem(
-                            chat = chat,
+                            uiState = uiState,
+                            profile = profiles,
                             onUserClick = onUserClick,
                             openScreen = openScreen
                         )
@@ -146,49 +149,59 @@ fun ChatListContent(
 }
 
 @Composable
-fun ChatListItem(chat: Profile, openScreen: (String) -> Unit, onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->}) {
+fun ChatListItem(
+    uiState: ChatListUiState,
+    chatId: String = "",
+    profile: Profile,
+    openScreen: (String) -> Unit,
+    onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
+    onChatClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(onClick = { onUserClick(chat.userId, openScreen) })
+            .clickable(
+                onClick = {
+                    if (uiState.isSearchBarVisible) {
+                        onUserClick(profile.userId, openScreen)
+                    } else {
+                        onChatClick(chatId, openScreen)
+                    }
+                }
+            )
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ProfileImage(chat.imageUrl)
+        ProfileImage(profile.imageUrl, size = 56.dp)
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = chat.name, style = MaterialTheme.typography.bodyLarge)
-            Text(text = chat.email, style = MaterialTheme.typography.bodyMedium)
+            Text(text = profile.name, style = MaterialTheme.typography.bodyLarge)
+            Text(text = profile.email, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
 
 @Composable
-fun ProfileImage(imageUrl: String) {
-    val painter = rememberAsyncImagePainter(
-        when (imageUrl == "") {
-            true -> ImageRequest.Builder(LocalContext.current)
-                .placeholder(R.drawable.user)
-                .apply(block = fun ImageRequest.Builder.() {
-                    transformations(CircleCropTransformation())
-                })
-                .build()
-            false -> ImageRequest.Builder(LocalContext.current)
-                .placeholder(R.drawable.user)
-                .data(data = imageUrl)
-                .apply(block = fun ImageRequest.Builder.() {
-                    transformations(CircleCropTransformation())
-                })
-                .build()
-        }
-    )
-    Image(
-        painter = painter,
-        contentDescription = "Profile Image",
-        modifier = Modifier
-            .size(56.dp)
-            .clip(CircleShape)
-    )
+fun ProfileImage(imageUrl: String, size: Dp) {
+    if (!imageUrl.equals("")){
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = stringResource(id = R.string.profile_image),
+            modifier = Modifier
+                .size(size)
+                .clip(CircleShape),
+            contentScale = ContentScale.Fit
+        )
+    } else {
+        Image(
+            painter = painterResource(id = R.drawable.user),
+            contentDescription = stringResource(id = R.string.profile_image),
+            modifier = Modifier
+                .size(size)
+                .clip(CircleShape),
+            contentScale = ContentScale.Fit
+        )
+    }
 }
 
 @Composable

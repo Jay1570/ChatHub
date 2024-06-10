@@ -25,12 +25,10 @@ class ChatListViewModel @Inject constructor(
 ) : ChatAppViewModel(logService) {
 
     val chatList = chatService.chatList
+    val profiles = chatService.profiles
 
     private val _userList = MutableStateFlow<List<Profile>>(emptyList())
     val userList: StateFlow<List<Profile>> get() = _userList
-
-    private val _profiles = MutableStateFlow<List<Profile>>(emptyList())
-    val profiles: StateFlow<List<Profile>> get() = _profiles
 
     var uiState = mutableStateOf(ChatListUiState())
         private set
@@ -41,11 +39,8 @@ class ChatListViewModel @Inject constructor(
     init {
         uiState.value  = uiState.value.copy(currentUserId = accountService.currentUserId)
         viewModelScope.launch {
-            chatList.collect { chats ->
-                val profiles = accountService.fetchProfilesForChats(chats)
-                _profiles.value = profiles
-                Log.d("ChatListViewModel", "Loaded chats: ${chats.size}")
-                Log.d("ChatListViewModel", "Loaded profiles: ${_profiles.value.size}")
+            profiles.collect { profile ->
+                Log.d("ChatListViewModel", "Loaded profiles: ${profile.size}")
             }
         }
     }
@@ -77,6 +72,14 @@ class ChatListViewModel @Inject constructor(
             val chat = chatService.createChat(userId)
             openScreen(DestinationScreen.Chat.createRoute(chat?.chatId))
         }.invokeOnCompletion { uiState.value = uiState.value.copy(isSearchBarVisible = false) }
+    }
+
+    fun onChatClick(chatId: String, openScreen: (String) -> Unit) {
+        openScreen(DestinationScreen.Chat.createRoute(chatId))
+    }
+
+    fun onSettingsClick(openScreen: (String) -> Unit) {
+        openScreen(DestinationScreen.Settings.route)
     }
 }
 
