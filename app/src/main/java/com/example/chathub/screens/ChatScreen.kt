@@ -1,22 +1,28 @@
 package com.example.chathub.screens
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,14 +34,19 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.chathub.R
+import com.example.chathub.ext.formatTime
 import com.example.chathub.model.Chat
 import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
@@ -52,6 +63,11 @@ fun ChatScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
     val chats = viewModel.chats.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
     val profile = viewModel.profile
+
+
+    LaunchedEffect(chats.value) {
+        viewModel.markMessagesAsRead()
+    }
 
     Scaffold(
         topBar = {
@@ -85,10 +101,15 @@ fun ChatScreenContent(
     Column(modifier = modifier
         .fillMaxSize()
         .imePadding()
+        .background(if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.surfaceVariant)
     ) {
 
-        ChatMessages(chats = chats, modifier = Modifier
-            .weight(1f))
+        ChatMessages(
+            chats = chats,
+            modifier = Modifier
+                .weight(1f),
+            uiState = uiState
+        )
 
         ChatInput(
             uiState = uiState,
@@ -98,23 +119,73 @@ fun ChatScreenContent(
     }
 }
 @Composable
-fun ChatMessages(chats: List<Chat>,modifier: Modifier = Modifier) {
+fun ChatMessages(chats: List<Chat>,modifier: Modifier = Modifier, uiState: ChatUiState) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
         reverseLayout = true
     ) {
         items(chats) { chat ->
-            ChatMessageItem(chat)
+            ChatMessageItem(chat, isFromMe = (uiState.currentUserId == chat.senderId))
         }
     }
 }
 
 @Composable
-fun ChatMessageItem(chat: Chat) {
-    Column(modifier = Modifier.padding(8.dp)) {
-        Text(text = chat.message, style = MaterialTheme.typography.bodyLarge)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = chat.timestamp, style = MaterialTheme.typography.bodySmall)
+fun ChatMessageItem(chat: Chat, isFromMe: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalAlignment = when(isFromMe) {
+            true -> Alignment.End
+            false -> Alignment.Start
+        },
+    ) {
+        Card(
+            modifier = Modifier
+                .widthIn(max = 200.dp, min = 70.dp),
+            shape = RoundedCornerShape(
+                topStart = 48f,
+                topEnd = 48f,
+                bottomStart = if (isFromMe) 48f else 0f,
+                bottomEnd = if (isFromMe) 0f else 48f
+            ),
+            colors = CardDefaults.cardColors(
+                containerColor =
+                    if (isSystemInDarkTheme()) {
+                        if (isFromMe) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer
+                    } else {
+                        if (isFromMe) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onTertiaryContainer
+                    }
+            ),
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(8.dp),
+                text = chat.message,
+                color = Color.White
+            )
+            Box(modifier = Modifier
+                .align(Alignment.End),
+            ){
+                Row{
+                    if (isFromMe) {
+                        Image(
+                            painter =
+                            if (chat.read) {
+                                painterResource(id = R.drawable.read)
+                            } else {
+                                painterResource(id = R.drawable.delivered)
+                            },
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(ButtonDefaults.IconSize),
+                        )
+                    }
+                }
+            }
+        }
+        Text(text = formatTime(chat.timestamp), fontSize = 10.sp)
     }
 }
 
@@ -200,20 +271,52 @@ fun AppBar(
 fun ChatScreenPreview() {
     val chats = listOf(
         Chat(
-            message = "Hi",
-            isRead = true
+            message = "What is your name?",
+            read = false,
+            senderId = "1223",
+            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
+        ),
+        Chat(
+            message = "I am fine",
+            read = true,
+            senderId = "1223",
+            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
+        ),
+        Chat(
+            message = "How are you?",
+            read = true,
+            senderId = "0",
+            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
         ),
         Chat(
             message = "Hi",
-            isRead = true
-        ),
-        Chat(
-            message = "Hi",
-            isRead = true
+            read = true,
+            senderId = "0",
+            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
         )
     )
     ChatHubTheme {
-        ChatScreenContent(chats = chats, uiState = ChatUiState(), onValueChange = {}, onSend = {})
+        ChatScreenContent(chats = chats, uiState = ChatUiState(currentUserId = "1223"), onValueChange = {}, onSend = {})
+    }
+}
+
+@Preview
+@Composable
+fun ChatScreenDarkPreview() {
+    val chats = listOf(
+        Chat(
+            message = "I am fine",
+            read = true,
+            senderId = "1223"
+        ),
+        Chat(
+            message = "How are you?",
+            read = true,
+            senderId = "0"
+        )
+    )
+    ChatHubTheme(darkTheme = true) {
+        ChatScreenContent(chats = chats, uiState = ChatUiState(currentUserId = "1223"), onValueChange = {}, onSend = {})
     }
 }
 

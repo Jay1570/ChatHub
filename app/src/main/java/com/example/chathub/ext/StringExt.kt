@@ -1,6 +1,8 @@
 package com.example.chathub.ext
 
 import android.util.Patterns
+import java.text.SimpleDateFormat
+import java.util.Locale
 import java.util.regex.Pattern
 
 private const val MIN_PASS_LENGTH = 8
@@ -22,4 +24,15 @@ fun String.passwordMatches(repeated: String): Boolean {
 
 fun String.idFromParameter(): String {
     return this.substring(1, this.length - 1)
+}
+
+fun formatTime(timestamp: String): String {
+    if (timestamp == "") {
+        return ""
+    }
+    val isoFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH)
+    isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
+    val date = isoFormat.parse(timestamp) ?: ""
+    val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
+    return sdf.format(date)
 }

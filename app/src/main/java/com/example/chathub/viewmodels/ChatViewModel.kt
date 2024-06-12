@@ -67,6 +67,17 @@ class ChatViewModel @Inject constructor(
         }
     }
 
+    fun markMessagesAsRead() {
+        viewModelScope.launch {
+            val unreadMessages = _chats.value.filter { it.receiverId == uiState.value.currentUserId && !it.read }
+            if (unreadMessages.isNotEmpty()) {
+                chatService.markMessagesAsRead(unreadMessages.map { it.chatId })
+            }
+        }.invokeOnCompletion {
+            uiState.value = uiState.value.copy(message = "")
+        }
+    }
+
     fun onMessageChange(newValue: String) {
         uiState.value = uiState.value.copy(message = newValue)
     }

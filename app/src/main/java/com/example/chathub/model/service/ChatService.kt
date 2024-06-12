@@ -11,9 +11,11 @@ import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -176,11 +178,32 @@ class ChatService @Inject constructor(
                 senderId = currentUserId,
                 receiverId = receiverId,
                 timestamp = Calendar.getInstance().time.toString(),
-                isRead = false
+                read = false
             )
             firestore.collection(CHAT_COLLECTION).add(chat).await()
         } catch (e: Exception) {
             Log.e("ChatService", "Error sending message", e)
+        }
+    }
+
+    fun getUnreadMessageCountForSessions(sessionIds: List<String>): Flow<Map<String, Int>> = flow {
+        while (true) {
+            val counts = sessionIds.associateWith { sessionId ->
+                val query = firestore.collection("chats")
+                    .whereEqualTo("sessionId", sessionId)
+                    .whereEqualTo("isRead", false)
+                val snapshot = query.get().await()
+                snapshot.size()
+            }
+            emit(counts)
+            delay(5000) // Polling interval (e.g., every 5 seconds)
+        }
+    }
+
+    suspend fun markMessagesAsRead(messageIds: List<String>) {
+        messageIds.forEach { messageId ->
+            firestore.collection(CHAT_COLLECTION).document(messageId)
+                .update("read", true).await()
         }
     }
 

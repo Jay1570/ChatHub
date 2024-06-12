@@ -49,7 +49,10 @@ fun Navigation(
             )
         }
         composable(route = DestinationScreen.Settings.route) {
-            SettingsScreen()
+            SettingsScreen(
+                openAndPopUp = { route -> appState.clearAndNavigate(route) },
+                navigateUp = { appState.navController.navigateUp() }
+            )
         }
     }
 }

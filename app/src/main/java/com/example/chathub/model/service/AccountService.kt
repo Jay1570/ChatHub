@@ -1,9 +1,12 @@
 package com.example.chathub.model.service
 
+import android.content.Context
 import android.util.Log
 import com.example.chathub.model.ChatList
 import com.example.chathub.model.Profile
 import com.example.chathub.model.trace
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
@@ -17,6 +20,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
+@Suppress("DEPRECATION")
 class AccountService @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
@@ -70,7 +74,14 @@ class AccountService @Inject constructor(
         auth.signInWithEmailAndPassword(email, password).await()
     }
 
-    fun signOut() {
+    suspend fun signOut(context: Context) {
+
+        val signInClient = GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN)
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+
+        if (account != null) {
+            signInClient.signOut().await()
+        }
         auth.signOut()
     }
 

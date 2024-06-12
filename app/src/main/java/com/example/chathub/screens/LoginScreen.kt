@@ -2,9 +2,8 @@
 
 package com.example.chathub.screens
 
-import android.content.Intent
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -58,7 +58,6 @@ import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.viewmodels.LoginUiState
 import com.example.chathub.viewmodels.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 
@@ -73,20 +72,35 @@ fun LoginScreen(
     val uiState by viewModel.uiState
     val context = LocalContext.current
 
-    val googleSignInClient = remember {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+    val googleSignInOptions = remember {
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.web_client_id))
             .requestEmail()
             .build()
-        GoogleSignIn.getClient(context, gso)
+    }
+    val googleSignInClient = remember {
+        GoogleSignIn.getClient(context, googleSignInOptions)
     }
 
-    val googleSignInLauncher = rememberGoogleSignInLauncher { account ->
-        account?.let {
-            viewModel.onGoogleLoginClick(account, openAndPopUp)
-        } ?: run {
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                viewModel.onGoogleLoginClick(account, openAndPopUp)
+            } catch (e: ApiException) {
+                SnackbarManager.showMessage(R.string.google_sign_in_failed)
+            }
+        } else {
             SnackbarManager.showMessage(R.string.google_sign_in_failed)
         }
+    }
+
+    fun signInWithGoogle() {
+        val signInIntent = googleSignInClient.signInIntent
+        googleSignInLauncher.launch(signInIntent)
     }
 
     Scaffold(
@@ -98,7 +112,7 @@ fun LoginScreen(
             uiState = uiState,
             onEmailChange = viewModel::onEmailChange,
             onPasswordChange = viewModel::onPasswordChange,
-            onGoogleLoginClick = { googleSignInLauncher.launch(googleSignInClient.signInIntent) },
+            onGoogleLoginClick = { signInWithGoogle() },
             onLoginClick = { viewModel.onSignInClick(openAndPopUp) },
             onNoAccountClick = { openScreen(DestinationScreen.SignUp.route) },
             onForgotPasswordClick = viewModel::onForgotPasswordClick,
@@ -106,22 +120,6 @@ fun LoginScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         )
-    }
-}
-
-@Composable
-fun rememberGoogleSignInLauncher(onResult: (GoogleSignInAccount?) -> Unit): ActivityResultLauncher<Intent> {
-    LocalContext.current
-    return rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            onResult(account)
-        } catch (e: ApiException) {
-            onResult(null)
-        }
     }
 }
 
@@ -144,7 +142,8 @@ fun LoginScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .alpha(if (uiState.inProcess) 0.5f else 1f),
+                .alpha(if (uiState.inProcess) 0.5f else 1f)
+                .imePadding(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

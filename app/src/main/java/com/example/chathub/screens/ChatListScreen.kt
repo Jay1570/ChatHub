@@ -3,6 +3,7 @@ package com.example.chathub.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -67,6 +68,7 @@ fun ChatListScreen(
     val chatList = viewModel.chatList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
     val userList by viewModel.userList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
     val profile by viewModel.profiles.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
+    val unreadCount by viewModel.unreadMessageCounts.collectAsStateWithLifecycle(emptyMap(), lifecycleOwner.lifecycle)
 
     val uiState by viewModel.uiState
     Scaffold(
@@ -85,6 +87,7 @@ fun ChatListScreen(
                 chatList = chatList.value,
                 onChatClick = viewModel::onChatClick,
                 profile = profile,
+                unreadCount = unreadCount,
                 openScreen = openScreen,
                 modifier = Modifier
                     .padding(innerPadding)
@@ -112,10 +115,11 @@ fun ChatListContent(
     userList: List<Profile> = emptyList(),
     chatList: List<ChatList> = emptyList(),
     onChatClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
+    unreadCount: Map<String,Int> = emptyMap(),
     profile: List<Profile> = emptyList(),
     onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
 ) {
-    Box(modifier = modifier) {
+    Box(modifier = modifier.background(if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.surfaceVariant)) {
         if(!uiState.isSearchBarVisible){
             LazyColumn {
                 items(chatList) { chat ->
@@ -125,6 +129,7 @@ fun ChatListContent(
                     ChatListItem(
                         uiState = uiState,
                         chatId = chat.chatId,
+                        unreadCount = unreadCount[chat.chatId] ?: 0,
                         onChatClick = onChatClick,
                         profile = profiles,
                         openScreen = openScreen
@@ -154,6 +159,7 @@ fun ChatListItem(
     chatId: String = "",
     profile: Profile,
     openScreen: (String) -> Unit,
+    unreadCount: Int = 0,
     onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
     onChatClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
 ) {
@@ -177,6 +183,16 @@ fun ChatListItem(
         Column {
             Text(text = profile.name, style = MaterialTheme.typography.bodyLarge)
             Text(text = profile.email, style = MaterialTheme.typography.bodyMedium)
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        if (unreadCount > 0) {
+            Text(
+                text = unreadCount.toString(),
+                color = Color.Black,
+                modifier = Modifier
+                    .background(color = Color.Green, shape = CircleShape)
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            )
         }
     }
 }
@@ -300,21 +316,26 @@ private fun AppBar(
 fun ChatListScreenPreview() {
     val chatList = listOf(
         ChatList(
-            chatId = "",
+            chatId = "121",
             user1Id = "",
             user2Id = ""
         ),
         ChatList(
-            chatId = "",
+            chatId = "120",
             user1Id = "",
             user2Id = ""
         )
+    )
+    val unreadCount: Map<String, Int> = mapOf(
+        "121" to 1,
+        "120" to 0
     )
     ChatHubTheme {
         ChatListContent(
             chatList = chatList,
             uiState = ChatListUiState(),
             openScreen = {},
+            unreadCount = unreadCount
         )
     }
 }
@@ -324,16 +345,26 @@ fun ChatListScreenPreview() {
 fun ChatListScreenDarkPreview() {
     val chatList = listOf(
         ChatList(
-            chatId = "",
+            chatId = "121",
+            user1Id = "",
+            user2Id = ""
+        ),
+        ChatList(
+            chatId = "120",
             user1Id = "",
             user2Id = ""
         )
+    )
+    val unreadCount: Map<String, Int> = mapOf(
+        "121" to 1,
+        "120" to 0
     )
     ChatHubTheme(darkTheme = true) {
         ChatListContent(
             chatList = chatList,
             uiState = ChatListUiState(),
             openScreen = {},
+            unreadCount = unreadCount
         )
     }
 }

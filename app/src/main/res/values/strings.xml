@@ -26,4 +26,6 @@
     <string name="chat_list_error">Failed to fetch chat list. Please try again later.</string>
     <string name="user_list_error">Failed to fetch chat list. Please try again later.</string>
     <string name="profile_image">Profile Image</string>
+    <string name="settings">Settings</string>
+    <string name="signout">Sign Out</string>
 </resources>
