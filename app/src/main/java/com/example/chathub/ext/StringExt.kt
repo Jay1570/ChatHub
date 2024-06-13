@@ -1,6 +1,7 @@
 package com.example.chathub.ext
 
 import android.util.Patterns
+import com.google.firebase.Timestamp
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.regex.Pattern
@@ -22,17 +23,8 @@ fun String.passwordMatches(repeated: String): Boolean {
     return this == repeated
 }
 
-fun String.idFromParameter(): String {
-    return this.substring(1, this.length - 1)
-}
+fun formatTime(timestamp: Timestamp): String {
 
-fun formatTime(timestamp: String): String {
-    if (timestamp == "") {
-        return ""
-    }
-    val isoFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH)
-    isoFormat.timeZone = java.util.TimeZone.getTimeZone("UTC")
-    val date = isoFormat.parse(timestamp) ?: ""
     val sdf = SimpleDateFormat("hh:mm a", Locale.getDefault())
-    return sdf.format(date)
+    return sdf.format(timestamp.toDate())
 }

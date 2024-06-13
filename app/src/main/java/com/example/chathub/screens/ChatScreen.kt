@@ -26,11 +26,12 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -52,6 +53,7 @@ import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.viewmodels.ChatUiState
 import com.example.chathub.viewmodels.ChatViewModel
+import com.google.firebase.Timestamp
 
 
 @Composable
@@ -101,7 +103,7 @@ fun ChatScreenContent(
     Column(modifier = modifier
         .fillMaxSize()
         .imePadding()
-        .background(if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.surfaceVariant)
+        .background(MaterialTheme.colorScheme.surface)
     ) {
 
         ChatMessages(
@@ -151,19 +153,15 @@ fun ChatMessageItem(chat: Chat, isFromMe: Boolean) {
                 bottomEnd = if (isFromMe) 0f else 48f
             ),
             colors = CardDefaults.cardColors(
-                containerColor =
-                    if (isSystemInDarkTheme()) {
-                        if (isFromMe) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer
-                    } else {
-                        if (isFromMe) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onTertiaryContainer
-                    }
+                containerColor = if (isFromMe) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = if (isFromMe) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer,
             ),
         ) {
             Text(
                 modifier = Modifier
                     .padding(8.dp),
                 text = chat.message,
-                color = Color.White
+                color = if (isFromMe) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onTertiaryContainer,
             )
             Box(modifier = Modifier
                 .align(Alignment.End),
@@ -201,34 +199,32 @@ fun ChatInput(
             .padding(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextField(
+        OutlinedTextField(
             value = uiState.message,
             minLines = 1,
+            maxLines = 3,
             onValueChange = onValueChange,
             placeholder = { Text(text = "Message") },
+            shape = RoundedCornerShape(50),
             modifier = Modifier
                 .weight(1f)
-                .padding(bottom = 5.dp, end = 8.dp)
+                .padding(8.dp)
                 .align(Alignment.CenterVertically),
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = Color.LightGray,
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                errorIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = Color.LightGray,
-                focusedTextColor = Color.Black,
-                unfocusedTextColor = Color.Black,
-                focusedPlaceholderColor = Color.DarkGray,
-                unfocusedPlaceholderColor = Color.DarkGray
-            ),
-            shape = RoundedCornerShape(100)
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
+                unfocusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
+            )
+
         )
         IconButton(
             onClick = onSend,
             modifier = Modifier
                 .align(Alignment.CenterVertically)
-                .size(TextFieldDefaults.MinHeight),
+                .size(OutlinedTextFieldDefaults.MinHeight),
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            )
         ) {
             Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
         }
@@ -248,15 +244,19 @@ fun AppBar(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-
                 ProfileImage(imageUrl = profile.imageUrl, size = 50.dp)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = profile.name, modifier = Modifier.padding())
+                Text(text = profile.name, modifier = Modifier.padding(), color = MaterialTheme.colorScheme.onPrimary)
             }
         },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
         navigationIcon = {
-            IconButton(onClick = onNavigateBack) {
+            IconButton(
+                onClick = onNavigateBack,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back"
@@ -274,25 +274,25 @@ fun ChatScreenPreview() {
             message = "What is your name?",
             read = false,
             senderId = "1223",
-            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
+            timestamp = Timestamp.now()
         ),
         Chat(
             message = "I am fine",
             read = true,
             senderId = "1223",
-            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
+            timestamp = Timestamp.now()
         ),
         Chat(
             message = "How are you?",
             read = true,
             senderId = "0",
-            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
+            timestamp = Timestamp.now()
         ),
         Chat(
             message = "Hi",
             read = true,
             senderId = "0",
-            timestamp = "Mon Jun 10 14:39:58 GMT+05:30 2024"
+            timestamp = Timestamp.now()
         )
     )
     ChatHubTheme {

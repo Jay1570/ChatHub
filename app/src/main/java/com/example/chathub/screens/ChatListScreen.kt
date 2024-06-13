@@ -3,7 +3,6 @@ package com.example.chathub.screens
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,11 +22,12 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -119,7 +119,10 @@ fun ChatListContent(
     profile: List<Profile> = emptyList(),
     onUserClick: (String, (String) -> Unit) -> Unit = {_,_ ->},
 ) {
-    Box(modifier = modifier.background(if (isSystemInDarkTheme()) MaterialTheme.colorScheme.surfaceDim else MaterialTheme.colorScheme.surfaceVariant)) {
+    Box(
+        modifier = modifier
+            .background(color = MaterialTheme.colorScheme.surface)
+        ) {
         if(!uiState.isSearchBarVisible){
             LazyColumn {
                 items(chatList) { chat ->
@@ -199,7 +202,7 @@ fun ChatListItem(
 
 @Composable
 fun ProfileImage(imageUrl: String, size: Dp) {
-    if (!imageUrl.equals("")){
+    if (imageUrl != ""){
         AsyncImage(
             model = imageUrl,
             contentDescription = stringResource(id = R.string.profile_image),
@@ -228,10 +231,15 @@ fun SearchBar(
     onCloseClick: () -> Unit
 ) {
     val focusRequester = remember { FocusRequester() }
-    TextField(
+    OutlinedTextField(
         value = uiState.query,
+        singleLine = true,
         onValueChange = { onSearch(it) },
         placeholder = { Text(text = "Search") },
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        ),
         trailingIcon = {
             IconButton(onClick = onCloseClick) {
                 Icon(
@@ -240,19 +248,10 @@ fun SearchBar(
                 )
             }
         },
+        shape = RoundedCornerShape(50),
         modifier = modifier
-            .clip(RoundedCornerShape(50.dp))
-            .focusRequester(focusRequester),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            errorIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent,
-            unfocusedContainerColor = Color.White,
-            focusedTextColor = Color.Black,
-            unfocusedTextColor = Color.Black
-        ),
+            .focusRequester(focusRequester)
+            .padding(8.dp),
         keyboardOptions = KeyboardOptions(
             imeAction = ImeAction.Search
         )
@@ -273,14 +272,19 @@ private fun AppBar(
     Box(modifier = Modifier.fillMaxWidth()){
         Column(
             Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
+                .background(MaterialTheme.colorScheme.primary)
                 .padding(bottom = 5.dp)){
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.app_name)) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                title = { Text(text = stringResource(id = R.string.app_name), color = MaterialTheme.colorScheme.onPrimary) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary),
                 actions = {
                     Box(Modifier.toolbarActions()) {
-                        IconButton(onClick = onSearchClick) {
+                        IconButton(
+                            onClick = onSearchClick,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.search),
                                 contentDescription = "Search"
@@ -288,7 +292,12 @@ private fun AppBar(
                         }
                     }
                     Box(Modifier.toolbarActions()) {
-                        IconButton(onClick = onSettingsClick) {
+                        IconButton(
+                            onClick = onSettingsClick,
+                            colors = IconButtonDefaults.filledIconButtonColors(
+                                contentColor = MaterialTheme.colorScheme.onPrimary
+                            )
+                        ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_settings),
                                 contentDescription = "Settings"

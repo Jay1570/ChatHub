@@ -66,7 +66,7 @@ class AccountService @Inject constructor(
         get() = auth.currentUser != null
 
     suspend fun update(profile: Profile): Unit =
-    trace(UPDATE_PROFILE_TRACE) {
+        trace(UPDATE_PROFILE_TRACE) {
             firestore.collection(PROFILE_COLLECTION).document(profile.userId).set(profile).await()
         }
 

@@ -9,11 +9,4 @@ data class Profile(
     val name: String = "",
     val imageUrl: String = "",
     val statusMessage: String = "Busy",
-) {
-    fun toMap() = mapOf(
-        "userId" to userId,
-        "email" to email,
-        "name" to name,
-        "imageUrl" to imageUrl
-    )
-}
+)

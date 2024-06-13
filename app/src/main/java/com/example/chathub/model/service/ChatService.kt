@@ -1,21 +1,21 @@
 package com.example.chathub.model.service
 
-import android.icu.util.Calendar
 import android.util.Log
 import com.example.chathub.model.Chat
 import com.example.chathub.model.ChatList
 import com.example.chathub.model.Profile
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FirebaseFirestoreException
 import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.snapshots
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -29,22 +29,30 @@ class ChatService @Inject constructor(
     val currentUserId = auth.currentUserId
 
     val chatList: Flow<List<ChatList>> =
-        auth.currentUser.flatMapLatest { user ->
-            firestore.collection(CHAT_LIST_COLLECTION)
-                .where(
-                    Filter.or(
-                        Filter.equalTo("user1Id", currentUserId),
-                        Filter.equalTo("user2Id", currentUserId)
+        flow {
+            val collectionRef = firestore.collection(CHAT_LIST_COLLECTION)
+            val querySnapshot = collectionRef.get().await()
+            if (!querySnapshot.isEmpty) {
+                collectionRef
+                    .where(
+                        Filter.or(
+                            Filter.equalTo("user1Id", currentUserId),
+                            Filter.equalTo("user2Id", currentUserId)
+                        )
                     )
-                )
-                .snapshots()
-                .map { snapshot ->
-                    snapshot.toObjects(ChatList::class.java)
-                }
-                .catch { e ->
-                    Log.e("ChatService", "Error fetching chats", e)
-                    emit(emptyList())
-                }
+                    .orderBy("timestamp",Query.Direction.DESCENDING)
+                    .snapshots()
+                    .map { snapshot ->
+                        snapshot.toObjects(ChatList::class.java)
+                    }
+                    .catch { e ->
+                        Log.e("ChatService", "Error fetching chats", e)
+                        emit(emptyList<ChatList>())
+                    }
+                    .collect { emit(it) }
+            } else {
+                emit(emptyList())
+            }
         }
 
     val profiles: Flow<List<Profile>> =
@@ -52,23 +60,27 @@ class ChatService @Inject constructor(
             val userIds = chats.flatMap { listOf(it.user1Id, it.user2Id) }
                 .filter { it != currentUserId }
                 .distinct()
-            firestore.collection(PROFILE_COLLECTION)
-                .whereIn("userId", userIds)
-                .snapshots()
-                .map { snapshot ->
-                    snapshot.toObjects(Profile::class.java)
-                }
-                .catch { e ->
-                    Log.e("ChatService", "Error fetching profiles", e)
-                    emit(emptyList())
-                }
+            if (userIds.isEmpty()) {
+                flowOf(emptyList())
+            } else {
+                firestore.collection(PROFILE_COLLECTION)
+                    .whereIn("userId", userIds)
+                    .snapshots()
+                    .map { snapshot ->
+                        snapshot.toObjects(Profile::class.java)
+                    }
+                    .catch { e ->
+                        Log.e("ChatService", "Error fetching profiles", e)
+                        emit(emptyList())
+                    }
+            }
         }
+
 
     suspend fun getProfile(chatId: String): Profile? {
         val userId = getChatId(chatId)
         return try {
             val profile = auth.getProfile(userId) ?: Profile()
-            Log.d("ChatService", profile.userId)
             return profile
         } catch (e: FirebaseFirestoreException) {
             Log.e("ChatService",e.message.toString())
@@ -172,15 +184,20 @@ class ChatService @Inject constructor(
 
     suspend fun sendMessage(sessionId: String, message: String, receiverId: String) {
         try {
+            val docRef = firestore.collection(CHAT_LIST_COLLECTION).document(sessionId).get().await()
+            val document = docRef.toObject(ChatList::class.java) ?: ChatList(chatId = sessionId)
+            val timestamp = Timestamp.now()
             val chat = Chat(
                 sessionId = sessionId,
                 message = message,
                 senderId = currentUserId,
                 receiverId = receiverId,
-                timestamp = Calendar.getInstance().time.toString(),
+                timestamp = timestamp,
                 read = false
             )
             firestore.collection(CHAT_COLLECTION).add(chat).await()
+            firestore.collection(CHAT_LIST_COLLECTION).document(sessionId).set(document.copy(timestamp = timestamp)).await()
+
         } catch (e: Exception) {
             Log.e("ChatService", "Error sending message", e)
         }
@@ -191,12 +208,12 @@ class ChatService @Inject constructor(
             val counts = sessionIds.associateWith { sessionId ->
                 val query = firestore.collection("chats")
                     .whereEqualTo("sessionId", sessionId)
-                    .whereEqualTo("isRead", false)
+                    .whereEqualTo("read", false)
+                    .whereNotEqualTo("senderId", currentUserId)
                 val snapshot = query.get().await()
                 snapshot.size()
             }
             emit(counts)
-            delay(5000) // Polling interval (e.g., every 5 seconds)
         }
     }
 
