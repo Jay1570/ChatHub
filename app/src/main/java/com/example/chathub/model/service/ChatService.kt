@@ -13,6 +13,7 @@ import com.google.firebase.firestore.snapshots
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -73,6 +74,27 @@ class ChatService @Inject constructor(
                         Log.e("ChatService", "Error fetching profiles", e)
                         emit(emptyList())
                     }
+            }
+        }
+
+    val unreadMessageCount: Flow<Map<String, Int>> =
+        chatList.flatMapLatest { chats ->
+            val sessionIds = chats.flatMap { listOf(it.chatId) }.distinct()
+            if (sessionIds.isEmpty()) {
+                flowOf(emptyMap())
+            } else {
+                combine(sessionIds.map { sessionId ->
+                    firestore.collection(CHAT_COLLECTION)
+                        .whereEqualTo("sessionId", sessionId)
+                        .whereEqualTo("read", false)
+                        .whereNotEqualTo("senderId", currentUserId)
+                        .snapshots()
+                        .map { querySnapshot ->
+                            sessionId to querySnapshot.size()
+                        }
+                }) { counts ->
+                    counts.toMap()
+                }
             }
         }
 
@@ -200,20 +222,6 @@ class ChatService @Inject constructor(
 
         } catch (e: Exception) {
             Log.e("ChatService", "Error sending message", e)
-        }
-    }
-
-    fun getUnreadMessageCountForSessions(sessionIds: List<String>): Flow<Map<String, Int>> = flow {
-        while (true) {
-            val counts = sessionIds.associateWith { sessionId ->
-                val query = firestore.collection("chats")
-                    .whereEqualTo("sessionId", sessionId)
-                    .whereEqualTo("read", false)
-                    .whereNotEqualTo("senderId", currentUserId)
-                val snapshot = query.get().await()
-                snapshot.size()
-            }
-            emit(counts)
         }
     }
 

@@ -96,8 +96,7 @@ fun LoginScreen(
         } else {
             SnackbarManager.showMessage(R.string.google_sign_in_failed)
         }
-    }
-
+   }
     fun signInWithGoogle() {
         val signInIntent = googleSignInClient.signInIntent
         googleSignInLauncher.launch(signInIntent)

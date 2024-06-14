@@ -69,7 +69,7 @@ fun ChatListScreen(
     val userList by viewModel.userList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
     val profile by viewModel.profiles.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
     val unreadCount by viewModel.unreadMessageCounts.collectAsStateWithLifecycle(emptyMap(), lifecycleOwner.lifecycle)
-
+    
     val uiState by viewModel.uiState
     Scaffold(
         topBar = {

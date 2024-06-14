@@ -33,8 +33,7 @@ class ChatListViewModel @Inject constructor(
     var uiState = mutableStateOf(ChatListUiState())
         private set
 
-    private val _unreadMessageCounts = MutableStateFlow<Map<String, Int>>(emptyMap())
-    val unreadMessageCounts: StateFlow<Map<String, Int>> get() = _unreadMessageCounts
+    val unreadMessageCounts = chatService.unreadMessageCount
 
     private val query:String get() = uiState.value.query
 
@@ -44,18 +43,6 @@ class ChatListViewModel @Inject constructor(
         viewModelScope.launch {
             profiles.collect { profile ->
                 Log.d("ChatListViewModel", "Loaded profiles: ${profile.size}")
-            }
-        }
-        loadUnreadMessageCounts()
-    }
-
-    private fun loadUnreadMessageCounts() {
-        viewModelScope.launch {
-            chatList.collect { chats ->
-                chatService.getUnreadMessageCountForSessions(chats.map { it.chatId })
-                    .collect { counts ->
-                        _unreadMessageCounts.value = counts
-                    }
             }
         }
     }

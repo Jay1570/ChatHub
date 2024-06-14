@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -213,8 +214,10 @@ fun ChatInput(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
                 unfocusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
-            )
+            ),
+            keyboardOptions = KeyboardOptions(
 
+            )
         )
         IconButton(
             onClick = onSend,
