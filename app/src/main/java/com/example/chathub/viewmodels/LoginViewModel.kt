@@ -78,7 +78,7 @@ class LoginViewModel @Inject constructor(
             val email = account.email ?: ""
             val imageUrl = account.photoUrl?.toString() ?: ""
 
-            accountService.storeOrUpdateProfile(Profile(name = name, email =  email, imageUrl =  imageUrl))
+            accountService.storeProfile(Profile(name = name, email =  email, imageUrl =  imageUrl))
 
             openAndPopUp(DestinationScreen.ChatList.route, DestinationScreen.Login.route)
         }.invokeOnCompletion {

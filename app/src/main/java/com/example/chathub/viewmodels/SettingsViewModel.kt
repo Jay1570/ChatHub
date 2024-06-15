@@ -16,11 +16,17 @@ class SettingsViewModel @Inject constructor(
     logService: LogService
 ) : ChatAppViewModel(logService) {
 
+    val profile = accountService.profile
+
     fun signOut(context: Context, openAndPopUp: (String) -> Unit) {
         viewModelScope.launch {
             accountService.signOut(context)
         }.invokeOnCompletion {
             openAndPopUp(DestinationScreen.Login.route)
         }
+    }
+
+    fun onProfileClick(openScreen: (String) -> Unit){
+        openScreen(DestinationScreen.Profile.route)
     }
 }

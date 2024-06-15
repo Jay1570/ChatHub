@@ -209,7 +209,7 @@ fun ProfileImage(imageUrl: String, size: Dp) {
             modifier = Modifier
                 .size(size)
                 .clip(CircleShape),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
     } else {
         Image(
@@ -218,7 +218,7 @@ fun ProfileImage(imageUrl: String, size: Dp) {
             modifier = Modifier
                 .size(size)
                 .clip(CircleShape),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Crop
         )
     }
 }
@@ -235,7 +235,7 @@ fun SearchBar(
         value = uiState.query,
         singleLine = true,
         onValueChange = { onSearch(it) },
-        placeholder = { Text(text = "Search") },
+        placeholder = { Text(text = stringResource(id = R.string.search)) },
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
             unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
@@ -244,7 +244,7 @@ fun SearchBar(
             IconButton(onClick = onCloseClick) {
                 Icon(
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "Search"
+                    contentDescription = stringResource(id = R.string.search)
                 )
             }
         },
@@ -287,7 +287,7 @@ private fun AppBar(
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.search),
-                                contentDescription = "Search"
+                                contentDescription = stringResource(id = R.string.search)
                             )
                         }
                     }
@@ -300,7 +300,7 @@ private fun AppBar(
                         ) {
                             Icon(
                                 painter = painterResource(id = R.drawable.ic_settings),
-                                contentDescription = "Settings"
+                                contentDescription = stringResource(id = R.string.settings)
                             )
                         }
                     }

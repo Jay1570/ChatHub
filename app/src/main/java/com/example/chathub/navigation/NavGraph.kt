@@ -10,6 +10,7 @@ import com.example.chathub.ApplicationState
 import com.example.chathub.screens.ChatListScreen
 import com.example.chathub.screens.ChatScreen
 import com.example.chathub.screens.LoginScreen
+import com.example.chathub.screens.ProfileScreen
 import com.example.chathub.screens.SettingsScreen
 import com.example.chathub.screens.SignUpScreen
 import com.example.chathub.viewmodels.NavigationViewModel
@@ -50,7 +51,13 @@ fun Navigation(
         }
         composable(route = DestinationScreen.Settings.route) {
             SettingsScreen(
-                openAndPopUp = { route -> appState.clearAndNavigate(route) },
+                openAndClear = { route -> appState.clearAndNavigate(route) },
+                openScreen = { route -> appState.navigate(route) },
+                navigateUp = { appState.navController.navigateUp() }
+            )
+        }
+        composable(route = DestinationScreen.Profile.route) {
+            ProfileScreen(
                 navigateUp = { appState.navController.navigateUp() }
             )
         }

@@ -38,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -156,13 +157,13 @@ fun LoginScreenContent(
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.google_login),
-                    contentDescription = "Google Login",
+                    contentDescription = stringResource(id = R.string.google_login),
                     modifier = Modifier
                         .wrapContentHeight()
                         .size(ButtonDefaults.IconSize)
                 )
                 Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
-                Text(text = "Login With Google")
+                Text(text = stringResource(id = R.string.google_login))
             }
 
             Divider(
@@ -245,7 +246,7 @@ fun Divider(modifier: Modifier = Modifier) {
                 .padding(horizontal = 8.dp)
                 .align(Alignment.CenterVertically)
         )
-        Box( // Right divider
+        Box(
             modifier = Modifier
                 .weight(1f)
                 .height(1.dp)

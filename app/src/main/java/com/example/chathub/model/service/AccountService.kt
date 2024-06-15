@@ -1,8 +1,8 @@
 package com.example.chathub.model.service
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
-import com.example.chathub.model.ChatList
 import com.example.chathub.model.Profile
 import com.example.chathub.model.trace
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -11,12 +11,11 @@ import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -25,6 +24,7 @@ class AccountService @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
 ) {
+
     val currentUserId: String
         get() = auth.currentUser?.uid.orEmpty()
 
@@ -36,6 +36,12 @@ class AccountService @Inject constructor(
             auth.addAuthStateListener(listener)
             awaitClose { auth.removeAuthStateListener(listener) }
         }
+
+    val profile: Flow<Profile> = flow {
+        val docRef = firestore.collection(PROFILE_COLLECTION).document(currentUserId).get().await()
+        val profile = docRef.toObject(Profile::class.java)
+        emit(profile?: Profile())
+    }
 
     suspend fun getProfile(userId: String = currentUserId): Profile? {
         return try {
@@ -52,16 +58,6 @@ class AccountService @Inject constructor(
         }
     }
 
-    suspend fun fetchProfilesForChats(chats: List<ChatList>): List<Profile> = coroutineScope{
-        val uniqueUserIds = chats.flatMap { listOf(it.user1Id, it.user2Id) }.distinct()
-        val profilesDeferred = uniqueUserIds.map { userId ->
-            async(Dispatchers.IO) {
-                getProfile(userId) ?: Profile() // Return empty profile if not found
-            }
-        }
-        profilesDeferred.map { it.await() }
-    }
-
     val hasUser: Boolean
         get() = auth.currentUser != null
 
@@ -69,6 +65,13 @@ class AccountService @Inject constructor(
         trace(UPDATE_PROFILE_TRACE) {
             firestore.collection(PROFILE_COLLECTION).document(profile.userId).set(profile).await()
         }
+
+    suspend fun uploadImageToFirebase(uri: Uri): String {
+        val storageReference = FirebaseStorage.getInstance().reference
+        val imageReference = storageReference.child("profileImages/${currentUserId}.jpg")
+        imageReference.putFile(uri).await()
+        return imageReference.downloadUrl.await().toString()
+    }
 
     suspend fun authenticate(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password).await()
@@ -98,17 +101,19 @@ class AccountService @Inject constructor(
         result.user?.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build())?.await()
     }
 
-    suspend fun storeOrUpdateProfile(userData: Profile) {
+    suspend fun storeProfile(userData: Profile) {
         val userId = currentUserId
         val profile = userData.copy(userId = userId)
-        val profileDocRef = firestore.collection("profiles").document(userId)
-
-        try {
-            profileDocRef.set(profile).await()
-            Log.d("AccountService", "Profile stored/updated successfully")
-        } catch (e: Exception) {
-            Log.e("AccountService", "Error storing/updating profile", e)
-            throw e
+        val profileDocRef = firestore.collection(PROFILE_COLLECTION).document(userId)
+        val profileDoc = profileDocRef.get().await()
+        if (!profileDoc.exists()) {
+            try {
+                profileDocRef.set(profile).await()
+                Log.d("AccountService", "Profile stored successfully")
+            } catch (e: Exception) {
+                Log.e("AccountService", "Error storing profile", e)
+                throw e
+            }
         }
     }
     companion object {

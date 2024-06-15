@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -42,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -176,7 +176,7 @@ fun ChatMessageItem(chat: Chat, isFromMe: Boolean) {
                             } else {
                                 painterResource(id = R.drawable.delivered)
                             },
-                            contentDescription = "",
+                            contentDescription = null,
                             modifier = Modifier
                                 .size(ButtonDefaults.IconSize),
                         )
@@ -205,7 +205,7 @@ fun ChatInput(
             minLines = 1,
             maxLines = 3,
             onValueChange = onValueChange,
-            placeholder = { Text(text = "Message") },
+            placeholder = { Text(text = stringResource(id = R.string.message)) },
             shape = RoundedCornerShape(50),
             modifier = Modifier
                 .weight(1f)
@@ -214,9 +214,6 @@ fun ChatInput(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
                 unfocusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
-            ),
-            keyboardOptions = KeyboardOptions(
-
             )
         )
         IconButton(
@@ -229,7 +226,7 @@ fun ChatInput(
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             )
         ) {
-            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
+            Icon(imageVector = Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(id = R.string.send))
         }
     }
 }
@@ -247,8 +244,8 @@ fun AppBar(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                ProfileImage(imageUrl = profile.imageUrl, size = 50.dp)
-                Spacer(modifier = Modifier.width(8.dp))
+                ProfileImage(imageUrl = profile.imageUrl, size = 40.dp)
+                Spacer(modifier = Modifier.width(16.dp))
                 Text(text = profile.name, modifier = Modifier.padding(), color = MaterialTheme.colorScheme.onPrimary)
             }
         },
@@ -262,7 +259,7 @@ fun AppBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    contentDescription = stringResource(R.string.back_button)
                 )
             }
         }

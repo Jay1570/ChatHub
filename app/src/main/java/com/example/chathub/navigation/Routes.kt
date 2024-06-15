@@ -8,9 +8,5 @@ sealed class DestinationScreen(var route: String) {
     object Chat: DestinationScreen("chat/{chatId}") {
         fun createRoute(id: String?) = "chat/$id"
     }
-    object StatusList: DestinationScreen("statusList")
-    object Status: DestinationScreen("status/{userId}") {
-        fun createRoute(id: String) = "chat/$id"
-    }
     object Settings: DestinationScreen("settings")
 }

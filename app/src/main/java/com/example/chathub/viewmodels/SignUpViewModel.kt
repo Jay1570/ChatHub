@@ -67,7 +67,7 @@ class SignUpViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 accountService.createAccount(name, email, password)
-                accountService.storeOrUpdateProfile(Profile(name = name, email = email))
+                accountService.storeProfile(Profile(name = name, email = email))
                 SnackbarManager.showMessage(R.string.account_created)
                 openScreen(DestinationScreen.ChatList.route)
             } catch (e: Exception) {
