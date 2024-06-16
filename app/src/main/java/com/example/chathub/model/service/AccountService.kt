@@ -86,10 +86,6 @@ class AccountService @Inject constructor(
         auth.signOut()
     }
 
-    suspend fun sendRecoveryEmail(email: String) {
-        auth.sendPasswordResetEmail(email).await()
-    }
-
     suspend fun googleSignIn(credential: AuthCredential) {
          auth.signInWithCredential(credential).await()
     }

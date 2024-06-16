@@ -52,7 +52,6 @@ import com.example.chathub.common.EmailField
 import com.example.chathub.common.PasswordField
 import com.example.chathub.ext.basicButton
 import com.example.chathub.ext.fieldModifier
-import com.example.chathub.ext.textButton
 import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import com.example.chathub.ui.theme.ChatHubTheme
@@ -115,7 +114,6 @@ fun LoginScreen(
             onGoogleLoginClick = { signInWithGoogle() },
             onLoginClick = { viewModel.onSignInClick(openAndPopUp) },
             onNoAccountClick = { openScreen(DestinationScreen.SignUp.route) },
-            onForgotPasswordClick = viewModel::onForgotPasswordClick,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -131,7 +129,6 @@ fun LoginScreenContent(
     onLoginClick: () -> Unit,
     onGoogleLoginClick: () -> Unit,
     onNoAccountClick: () -> Unit,
-    onForgotPasswordClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
 
@@ -207,13 +204,6 @@ fun LoginScreenContent(
                 modifier = Modifier.basicButton(),
                 enabled = enabled
             )
-
-            BasicTextButton(
-                text = R.string.forgot_password,
-                action = onForgotPasswordClick,
-                modifier = Modifier.textButton(),
-                enabled = enabled
-            )
         }
         if (uiState.inProcess) {
             Box(
@@ -265,8 +255,7 @@ fun LoginScreenPreview() {
             onPasswordChange = {},
             onLoginClick = {},
             onGoogleLoginClick = {},
-            onNoAccountClick = {},
-            onForgotPasswordClick = {}
+            onNoAccountClick = {}
         )
     }
 }
@@ -281,8 +270,7 @@ fun LoginScreenDarkPreview() {
             onPasswordChange = {},
             onLoginClick = {},
             onGoogleLoginClick = {},
-            onNoAccountClick = {},
-            onForgotPasswordClick = {}
+            onNoAccountClick = {}
         )
     }
 }

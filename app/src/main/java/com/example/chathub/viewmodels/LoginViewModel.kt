@@ -57,17 +57,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onForgotPasswordClick() {
-        if (!email.isValidEmail()) {
-            SnackbarManager.showMessage(R.string.email_error)
-            return
-        }
-        launchCatching {
-            accountService.sendRecoveryEmail(email)
-            SnackbarManager.showMessage(R.string.recovery_email_sent)
-        }
-    }
-
     fun onGoogleLoginClick(account: GoogleSignInAccount, openAndPopUp: (String, String) -> Unit) {
         uiState.value = uiState.value.copy(inProcess = true)
         val credential = GoogleAuthProvider.getCredential(account.idToken, null)
