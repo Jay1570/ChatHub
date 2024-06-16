@@ -12,7 +12,7 @@ ChatHub is a modern, user-friendly chat application designed to provide seamless
 
 ## Technologies Used
 
-- **Firebase**: Real-time database, authentication, and storage.
+- **Firebase**: Firestore database, authentication, and storage.
 - **Jetpack Compose**: Modern Android UI toolkit.
 - **Kotlin Coroutines and Flow**: Asynchronous programming and reactive streams for handling real-time data.
 - **Hilt**: Dependency injection for managing app components.
