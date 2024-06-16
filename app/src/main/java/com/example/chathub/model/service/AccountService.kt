@@ -3,18 +3,20 @@ package com.example.chathub.model.service
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import com.example.chathub.R
 import com.example.chathub.model.Profile
 import com.example.chathub.model.trace
+import com.example.chathub.snackbar.SnackbarManager
+import com.example.chathub.snackbar.SnackbarMessage
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.AuthCredential
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -27,15 +29,6 @@ class AccountService @Inject constructor(
 
     val currentUserId: String
         get() = auth.currentUser?.uid.orEmpty()
-
-    val currentUser: Flow<Profile>
-        get() = callbackFlow {
-            val listener = FirebaseAuth.AuthStateListener { auth ->
-                this.trySend(auth.currentUser?.let { Profile(it.uid) } ?: Profile())
-            }
-            auth.addAuthStateListener(listener)
-            awaitClose { auth.removeAuthStateListener(listener) }
-        }
 
     val profile: Flow<Profile> = flow {
         val docRef = firestore.collection(PROFILE_COLLECTION).document(currentUserId).get().await()
@@ -77,6 +70,11 @@ class AccountService @Inject constructor(
         auth.signInWithEmailAndPassword(email, password).await()
     }
 
+    fun isSignedInWithGoogle(context: Context): Boolean {
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        return account != null
+    }
+
     suspend fun signOut(context: Context) {
 
         val signInClient = GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -101,6 +99,22 @@ class AccountService @Inject constructor(
         result.user?.updateProfile(UserProfileChangeRequest.Builder().setDisplayName(name).build())?.await()
     }
 
+    suspend fun changePassword(oldPassword: String, newPassword: String) : Boolean{
+        try {
+            val user = auth.currentUser ?: return false
+            val email = user.email ?: return false
+            val credential = EmailAuthProvider.getCredential(email, oldPassword)
+            user.reauthenticate(credential).await()
+            user.updatePassword(newPassword).await()
+            SnackbarManager.showMessage(R.string.password_changed_successful)
+            return true
+        } catch (e: Exception) {
+            Log.e("AccountService", e.message.toString())
+            SnackbarManager.showMessage(SnackbarMessage.StringSnackbar(e.message.toString()))
+            return false
+        }
+    }
+
     suspend fun storeProfile(userData: Profile) {
         val userId = currentUserId
         val profile = userData.copy(userId = userId)
@@ -118,7 +132,6 @@ class AccountService @Inject constructor(
     }
     companion object {
         private const val PROFILE_COLLECTION = "profiles"
-        private const val USER_ID_FIELD = "userId"
         private const val UPDATE_PROFILE_TRACE = "updateProfile"
     }
 }

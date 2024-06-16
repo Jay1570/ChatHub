@@ -36,6 +36,18 @@
     <string name="name">Name</string>
     <string name="about">About</string>
     <string name="email">Email</string>
-    <string name="error_update_profile">Error updating your profile.Please try again later</string>
+    <string name="error_update_profile">Error updating your profile.Please try again later.</string>
     <string name="successful_update_profile">Profile Updated Successfully</string>
+    <string name="account_security">Account Security</string>
+    <string name="change_password">Change Password</string>
+    <string name="password_match">Old and New password must not be same</string>
+    <string name="password_changed_successful">Password Changed Successfully</string>
+    <string name="password_changed_failed">Error changing Password.Please try again later.</string>
+    <string name="can_not_change_password">Can not change ps</string>
+    <string name="old_password">Old Password</string>
+    <string name="new_password">New Password</string>
+    <string name="change_password_google_error">Cannot change password because You have signed in with your Google Account.</string>
+    <string name="invitation_message">Hey! I’ve been using this amazing app and thought you might like it too.Check it out and download it here\n\n%1$s</string>
+    <string name="invite_friends">Invite Your Friends</string>
+    <string name="share_app">Share with your Friends</string>
 </resources>

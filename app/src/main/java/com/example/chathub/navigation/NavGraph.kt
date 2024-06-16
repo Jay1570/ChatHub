@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.chathub.ApplicationState
+import com.example.chathub.screens.ChangePasswordScreen
 import com.example.chathub.screens.ChatListScreen
 import com.example.chathub.screens.ChatScreen
 import com.example.chathub.screens.LoginScreen
@@ -22,23 +23,27 @@ fun Navigation(
 ) {
     val startDestination = viewModel.checkUserStatus()
     NavHost(navController = appState.navController, startDestination = startDestination) {
+
         composable(route = DestinationScreen.Login.route) {
             LoginScreen(
                 openScreen = { route -> appState.navigate(route) },
                 openAndPopUp = { route,popUp -> appState.navigateAndPopUp(route,popUp) }
             )
         }
+
         composable(route = DestinationScreen.SignUp.route) {
             SignUpScreen(
                 navigateUp = { appState.navController.navigateUp() },
                 openScreen = { route -> appState.clearAndNavigate(route) }
             )
         }
+
         composable(route = DestinationScreen.ChatList.route) {
             ChatListScreen(
                 openScreen = { route -> appState.navigate(route) }
             )
         }
+
         composable(
             route = DestinationScreen.Chat.route,
             arguments = listOf(navArgument("chatId") {
@@ -49,6 +54,7 @@ fun Navigation(
                 onNavigateBack = { appState.navController.navigateUp() }
             )
         }
+
         composable(route = DestinationScreen.Settings.route) {
             SettingsScreen(
                 openAndClear = { route -> appState.clearAndNavigate(route) },
@@ -56,8 +62,15 @@ fun Navigation(
                 navigateUp = { appState.navController.navigateUp() }
             )
         }
+
         composable(route = DestinationScreen.Profile.route) {
             ProfileScreen(
+                navigateUp = { appState.navController.navigateUp() }
+            )
+        }
+
+        composable(route = DestinationScreen.ChangePassword.route) {
+            ChangePasswordScreen(
                 navigateUp = { appState.navController.navigateUp() }
             )
         }

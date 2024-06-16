@@ -67,10 +67,18 @@ fun PasswordField(
     value: String,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes placeholder: Int = R.string.enter_password,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     enabled: Boolean = true
 ) {
-    PasswordField(value = value, placeholder = R.string.enter_password, onNewValue = onNewValue, modifier = modifier, keyboardOptions = keyboardOptions, enabled = enabled)
+    Password(
+        value = value,
+        placeholder = placeholder,
+        onNewValue = onNewValue,
+        modifier = modifier,
+        keyboardOptions = keyboardOptions,
+        enabled = enabled
+    )
 }
 
 @Composable
@@ -78,14 +86,22 @@ fun RepeatPasswordField(
     value: String,
     onNewValue: (String) -> Unit,
     modifier: Modifier = Modifier,
+    @StringRes placeholder: Int = R.string.confirm_password,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     enabled: Boolean = true
 ) {
-    PasswordField(value = value, placeholder = R.string.confirm_password, onNewValue = onNewValue, modifier = modifier, keyboardOptions = keyboardOptions, enabled = enabled)
+    Password(
+        value = value,
+        placeholder = placeholder,
+        onNewValue = onNewValue,
+        modifier = modifier,
+        keyboardOptions = keyboardOptions,
+        enabled = enabled
+    )
 }
 
 @Composable
-private fun PasswordField(
+private fun Password(
     value: String,
     @StringRes placeholder: Int,
     onNewValue: (String) -> Unit,

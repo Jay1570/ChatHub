@@ -127,7 +127,12 @@ fun ProfileScreenContent(
             imeAction = ImeAction.Default
         )
         Spacer(modifier = Modifier.weight(1f))
-        BasicButton(text = R.string.done, action = { onDoneClick() }, modifier = Modifier.basicButton())
+        BasicButton(
+            text = R.string.done,
+            action = { onDoneClick() },
+            modifier = Modifier.basicButton(),
+            enabled = !uiState.inProcess
+        )
     }
     if (uiState.inProcess) {
         Box(

@@ -3,9 +3,11 @@ package com.example.chathub.viewmodels
 import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
+import com.example.chathub.R
 import com.example.chathub.model.service.AccountService
 import com.example.chathub.model.service.LogService
 import com.example.chathub.navigation.DestinationScreen
+import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,5 +30,13 @@ class SettingsViewModel @Inject constructor(
 
     fun onProfileClick(openScreen: (String) -> Unit){
         openScreen(DestinationScreen.Profile.route)
+    }
+
+    fun onAccountSecurityClick(context: Context, openScreen: (String) -> Unit){
+        if (accountService.isSignedInWithGoogle(context)) {
+            SnackbarManager.showMessage(R.string.change_password_google_error)
+            return
+        }
+        openScreen(DestinationScreen.ChangePassword.route)
     }
 }

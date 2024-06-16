@@ -9,4 +9,5 @@ sealed class DestinationScreen(var route: String) {
         fun createRoute(id: String?) = "chat/$id"
     }
     object Settings: DestinationScreen("settings")
+    object ChangePassword: DestinationScreen("changePassword")
 }
