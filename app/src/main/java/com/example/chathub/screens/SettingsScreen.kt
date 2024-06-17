@@ -2,6 +2,7 @@ package com.example.chathub.screens
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,13 +14,20 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -37,6 +45,7 @@ import com.example.chathub.ext.basicButton
 import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.viewmodels.SettingsViewModel
+import com.example.chathub.viewmodels.Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,6 +59,8 @@ fun SettingsScreen(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val profile = viewModel.profile.collectAsStateWithLifecycle(Profile(), lifecycleOwner.lifecycle)
+    val uiState by viewModel.uiState
+    val dynamicColor: Boolean by viewModel.isDynamicColorEnabled.collectAsStateWithLifecycle(initialValue = false, lifecycleOwner.lifecycle)
 
     Scaffold(
         topBar = { BasicToolBar(title = R.string.settings, canNavigateBack = true, navigateUp = navigateUp) }
@@ -62,8 +73,18 @@ fun SettingsScreen(
             onSignOutClick = viewModel::signOut,
             onProfileClick = { viewModel.onProfileClick(openScreen) },
             onAccountSecurityClick = { viewModel.onAccountSecurityClick(context, openScreen) },
+            onThemeClick = viewModel::onThemeClick,
+            isDynamicColorEnabled = dynamicColor,
+            onDynamicColorsSwitchChange = viewModel::onDynamicColorSwitchChanged,
             openAndClear = openAndClear
         )
+        if (uiState.isThemeDialogVisible) {
+            ThemeSelectionDialog(
+                currentTheme = uiState.currentTheme,
+                onDismiss = viewModel::onDismissThemeDialog,
+                onThemeSelected = viewModel::onThemeSelected
+            )
+        }
     }
 }
 
@@ -74,6 +95,9 @@ fun SettingsScreenContent(
     onSignOutClick: (Context, (String) -> Unit) -> Unit,
     onProfileClick: () -> Unit,
     onAccountSecurityClick: () -> Unit,
+    onThemeClick: () -> Unit,
+    isDynamicColorEnabled: Boolean,
+    onDynamicColorsSwitchChange: (Boolean) -> Unit,
     openAndClear: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -85,6 +109,16 @@ fun SettingsScreenContent(
         AccountSecurityCard(onClick = onAccountSecurityClick)
         Spacer(modifier = Modifier.width(10.dp))
         InviteAFriend()
+        Spacer(modifier = Modifier.width(10.dp))
+        ThemeSelectionCard(onClick = onThemeClick)
+        Spacer(modifier = Modifier.width(10.dp))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S){
+            DynamicColorSwitch(
+                isDynamicColorEnabled = isDynamicColorEnabled,
+                onSwitchChanged = onDynamicColorsSwitchChange
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+        }
         BasicButton(
             text = R.string.signout,
             action = {
@@ -173,6 +207,95 @@ private fun shareInvite(context: Context) {
     context.startActivity(Intent.createChooser(intent, context.getString(R.string.invite_friends)))
 }
 
+@Composable
+fun ThemeSelectionCard(onClick:() -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(painter = painterResource(id = R.drawable.theme), contentDescription = null, modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(text = stringResource(id = R.string.theme), style = MaterialTheme.typography.bodyLarge)
+            Text(text = stringResource(id = R.string.change_theme), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+fun ThemeSelectionDialog(
+    currentTheme: Theme,
+    onDismiss: () -> Unit,
+    onThemeSelected: (Theme) -> Unit
+) {
+
+    val options = listOf(Theme.LIGHT, Theme.DARK, Theme.SYSTEM_DEFAULT)
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf(currentTheme) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(id = R.string.select_theme)) },
+        text = {
+            Column {
+                options.forEach { theme ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onOptionSelected(theme) }
+                    ) {
+                        RadioButton(
+                            selected = (theme == selectedOption),
+                            onClick = { onOptionSelected(theme) }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = stringResource(id = theme.toTextResId()))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onThemeSelected(selectedOption) }) {
+                Text(text = stringResource(id = R.string.confirm))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = stringResource(id = R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun DynamicColorSwitch(
+    isDynamicColorEnabled: Boolean,
+    onSwitchChanged: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSwitchChanged(!isDynamicColorEnabled) }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(painter = painterResource(id = R.drawable.dynamic_color), contentDescription = null, modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(text = stringResource(id = R.string.dynamic_color), style = MaterialTheme.typography.bodyLarge)
+            Text(text = stringResource(id = R.string.dynamic_color_description), style = MaterialTheme.typography.bodyMedium)
+        }
+        Spacer(modifier = Modifier.weight(1f))
+        Switch(
+            checked = isDynamicColorEnabled,
+            onCheckedChange = { onSwitchChanged(it) }
+        )
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
@@ -184,7 +307,10 @@ fun SettingsScreenPreview() {
             onSignOutClick = {_,_ ->},
             openAndClear = {},
             onProfileClick = {},
-            onAccountSecurityClick = {}
+            onAccountSecurityClick = {},
+            onThemeClick = {},
+            isDynamicColorEnabled = false,
+            onDynamicColorsSwitchChange = {}
         )
     }
 }

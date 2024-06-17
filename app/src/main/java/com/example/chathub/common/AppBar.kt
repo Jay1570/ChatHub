@@ -1,24 +1,19 @@
 package com.example.chathub.common
 
-import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.chathub.R
@@ -32,11 +27,16 @@ fun BasicToolBar(
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(stringResource(title), fontWeight = FontWeight.Bold) },
+        title = { Text(stringResource(title), fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimary) },
         scrollBehavior = scrollBehavior,
         navigationIcon = {
             if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
+                IconButton(
+                    onClick = navigateUp,
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(id = R.string.back_button))
@@ -49,30 +49,6 @@ fun BasicToolBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActionToolBar(
-    @StringRes title: Int,
-    @DrawableRes endActionIcon: Int,
-    modifier: Modifier,
-    endAction: () -> Unit
-) {
-    TopAppBar(
-        title = { Text(text = stringResource(id = title)) },
-        colors = toolbarColor(),
-        actions = {
-            Box(modifier) {
-                IconButton(onClick = endAction) {
-                    Icon(painter = painterResource(id = endActionIcon), contentDescription = "Action")
-                }
-            }
-        }
-    )
-}
-
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun toolbarColor(darkTheme: Boolean = isSystemInDarkTheme()): TopAppBarColors {
-    return if (darkTheme) TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
-    else TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+fun toolbarColor(): TopAppBarColors {
+    return TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.primary)
 }

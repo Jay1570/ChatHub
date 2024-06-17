@@ -1,24 +1,42 @@
 package com.example.chathub.viewmodels
 
 import android.content.Context
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
 import com.example.chathub.R
+import com.example.chathub.ThemePreferenceManager
 import com.example.chathub.model.service.AccountService
 import com.example.chathub.model.service.LogService
 import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val accountService: AccountService,
-    logService: LogService
+    logService: LogService,
+    private val themePreferenceManager: ThemePreferenceManager
 ) : ChatAppViewModel(logService) {
 
     val profile = accountService.profile
+    var uiState = mutableStateOf(SettingsUiState())
+        private set
+    val isDynamicColorEnabled = themePreferenceManager.dynamicColor
+
+    init {
+        viewModelScope.launch {
+            themePreferenceManager.theme.collectLatest { theme ->
+                uiState.value = uiState.value.copy(currentTheme = theme)
+            }
+            themePreferenceManager.dynamicColor.collectLatest { isEnabled ->
+                uiState.value = uiState.value.copy(isDynamicColorEnabled = isEnabled)
+            }
+        }
+    }
 
     fun signOut(context: Context, openAndPopUp: (String) -> Unit) {
         viewModelScope.launch {
@@ -26,6 +44,28 @@ class SettingsViewModel @Inject constructor(
         }.invokeOnCompletion {
             openAndPopUp(DestinationScreen.Login.route)
         }
+    }
+
+    fun onDynamicColorSwitchChanged(isEnabled: Boolean) {
+        viewModelScope.launch{
+            themePreferenceManager.setDynamicColorEnabled(isEnabled)
+        }
+        uiState.value = uiState.value.copy(isDynamicColorEnabled = isEnabled)
+    }
+
+    fun onThemeClick() {
+        uiState.value = uiState.value.copy(isThemeDialogVisible = true)
+    }
+
+    fun onDismissThemeDialog() {
+        uiState.value = uiState.value.copy(isThemeDialogVisible = false)
+    }
+
+    fun onThemeSelected(theme: Theme) {
+        viewModelScope.launch {
+            themePreferenceManager.setTheme(theme)
+        }
+        uiState.value = uiState.value.copy(currentTheme = theme, isThemeDialogVisible = false)
     }
 
     fun onProfileClick(openScreen: (String) -> Unit){
@@ -40,3 +80,23 @@ class SettingsViewModel @Inject constructor(
         openScreen(DestinationScreen.ChangePassword.route)
     }
 }
+
+enum class Theme {
+    LIGHT,
+    DARK,
+    SYSTEM_DEFAULT;
+
+    fun toTextResId(): Int {
+        return when (this) {
+            DARK -> R.string.dark
+            LIGHT -> R.string.light
+            SYSTEM_DEFAULT -> R.string.system
+        }
+    }
+}
+
+data class SettingsUiState(
+    val isThemeDialogVisible: Boolean = false,
+    val currentTheme: Theme = Theme.SYSTEM_DEFAULT,
+    val isDynamicColorEnabled: Boolean = false
+)
