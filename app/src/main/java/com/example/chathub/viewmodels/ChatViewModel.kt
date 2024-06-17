@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
+import com.example.chathub.ThemePreferenceManager
 import com.example.chathub.model.Chat
 import com.example.chathub.model.Profile
-import com.example.chathub.model.service.AccountService
 import com.example.chathub.model.service.ChatService
 import com.example.chathub.model.service.LogService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +21,7 @@ import javax.inject.Inject
 class ChatViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val chatService: ChatService,
-    private val accountService: AccountService,
+    themePreferenceManager: ThemePreferenceManager,
     logService: LogService
 ) : ChatAppViewModel(logService) {
 
@@ -33,6 +33,7 @@ class ChatViewModel @Inject constructor(
     val chats: StateFlow<List<Chat>> get() = _chats
 
     val profile: Profile get() = uiState.value.profile
+    val theme = themePreferenceManager.theme
 
     init {
         sessionId = checkNotNull(savedStateHandle["chatId"])

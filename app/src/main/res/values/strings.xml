@@ -50,4 +50,14 @@
     <string name="invitation_message">Hey! I’ve been using this amazing app and thought you might like it too.Check it out and download it here\n\n%1$s</string>
     <string name="invite_friends">Invite Your Friends</string>
     <string name="share_app">Share with your Friends</string>
+    <string name="theme">Theme</string>
+    <string name="change_theme">Change Theme</string>
+    <string name="select_theme">Select Theme</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="dark">Dark Mode</string>
+    <string name="light">Light Mode</string>
+    <string name="system">System Default</string>
+    <string name="dynamic_color">Dynamic Color</string>
+    <string name="dynamic_color_description">Colorscheme based on your Wallpaper</string>
 </resources>

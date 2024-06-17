@@ -54,6 +54,7 @@ import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.viewmodels.ChatUiState
 import com.example.chathub.viewmodels.ChatViewModel
+import com.example.chathub.viewmodels.Theme
 import com.google.firebase.Timestamp
 
 
@@ -65,8 +66,14 @@ fun ChatScreen(
     val uiState = viewModel.uiState.value
     val lifecycleOwner = LocalLifecycleOwner.current
     val chats = viewModel.chats.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
+    val theme = viewModel.theme.collectAsStateWithLifecycle(Theme.SYSTEM_DEFAULT, lifecycleOwner.lifecycle)
+    val darkTheme: Boolean =
+        when(theme.value) {
+            Theme.DARK -> true
+            Theme.SYSTEM_DEFAULT -> isSystemInDarkTheme()
+            Theme.LIGHT -> false
+        }
     val profile = viewModel.profile
-
 
     LaunchedEffect(chats.value) {
         viewModel.markMessagesAsRead()
@@ -86,6 +93,7 @@ fun ChatScreen(
                 chats = chats.value,
                 uiState = uiState,
                 onValueChange = viewModel::onMessageChange,
+                darkTheme = darkTheme,
                 onSend = viewModel::sendMessage
             )
         }
@@ -98,6 +106,7 @@ fun ChatScreenContent(
     uiState: ChatUiState,
     onValueChange: (String) -> Unit,
     onSend: () -> Unit,
+    darkTheme: Boolean,
     modifier: Modifier = Modifier
 ) {
 
@@ -106,7 +115,6 @@ fun ChatScreenContent(
         .imePadding()
         .background(MaterialTheme.colorScheme.surface)
     ) {
-
         ChatMessages(
             chats = chats,
             modifier = Modifier
@@ -117,7 +125,8 @@ fun ChatScreenContent(
         ChatInput(
             uiState = uiState,
             onValueChange = onValueChange,
-            onSend = onSend
+            onSend = onSend,
+            darkTheme = darkTheme
         )
     }
 }
@@ -191,6 +200,7 @@ fun ChatMessageItem(chat: Chat, isFromMe: Boolean) {
 @Composable
 fun ChatInput(
     uiState: ChatUiState,
+    darkTheme: Boolean,
     onValueChange: (String) -> Unit,
     onSend: () -> Unit
 ) {
@@ -212,8 +222,8 @@ fun ChatInput(
                 .padding(8.dp)
                 .align(Alignment.CenterVertically),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
-                unfocusedContainerColor = if (!isSystemInDarkTheme()) Color.White else Color.DarkGray,
+                focusedContainerColor = if (!darkTheme) Color.White else Color.DarkGray,
+                unfocusedContainerColor = if (!darkTheme) Color.White else Color.DarkGray,
             )
         )
         IconButton(
@@ -296,27 +306,7 @@ fun ChatScreenPreview() {
         )
     )
     ChatHubTheme {
-        ChatScreenContent(chats = chats, uiState = ChatUiState(currentUserId = "1223"), onValueChange = {}, onSend = {})
-    }
-}
-
-@Preview
-@Composable
-fun ChatScreenDarkPreview() {
-    val chats = listOf(
-        Chat(
-            message = "I am fine",
-            read = true,
-            senderId = "1223"
-        ),
-        Chat(
-            message = "How are you?",
-            read = true,
-            senderId = "0"
-        )
-    )
-    ChatHubTheme(darkTheme = true) {
-        ChatScreenContent(chats = chats, uiState = ChatUiState(currentUserId = "1223"), onValueChange = {}, onSend = {})
+        ChatScreenContent(chats = chats, uiState = ChatUiState(currentUserId = "1223"), onValueChange = {}, onSend = {}, darkTheme = false)
     }
 }
 
