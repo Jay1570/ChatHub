@@ -1,4 +1,4 @@
-package com.example.chathub.screens
+package com.example.chathub.screens.profile
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -43,9 +43,8 @@ import com.example.chathub.common.BasicButton
 import com.example.chathub.common.BasicToolBar
 import com.example.chathub.ext.basicButton
 import com.example.chathub.model.Profile
+import com.example.chathub.screens.chat_list.ProfileImage
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.example.chathub.viewmodels.ProfileUiState
-import com.example.chathub.viewmodels.ProfileViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

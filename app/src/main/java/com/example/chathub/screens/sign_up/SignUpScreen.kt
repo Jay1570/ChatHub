@@ -1,4 +1,4 @@
-package com.example.chathub.screens
+package com.example.chathub.screens.sign_up
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,37 +26,42 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.chathub.R
 import com.example.chathub.common.BasicButton
+import com.example.chathub.common.BasicField
 import com.example.chathub.common.BasicToolBar
+import com.example.chathub.common.EmailField
 import com.example.chathub.common.PasswordField
 import com.example.chathub.common.RepeatPasswordField
 import com.example.chathub.ext.fieldModifier
-import com.example.chathub.viewmodels.ChangePasswordUiState
-import com.example.chathub.viewmodels.ChangePasswordViewModel
+import com.example.chathub.ui.theme.ChatHubTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChangePasswordScreen(
+fun SignUpScreen(
+    openScreen: (String) -> Unit,
     navigateUp: () -> Unit,
-    viewModel: ChangePasswordViewModel = hiltViewModel()
+    viewModel: SignUpViewModel = hiltViewModel()
 ) {
 
     val uiState by viewModel.uiState
 
     Scaffold(
         topBar = {
-            BasicToolBar(title = R.string.change_password, canNavigateBack = true, navigateUp = navigateUp)
+            BasicToolBar(title = R.string.signup, canNavigateBack = true, navigateUp = navigateUp)
         }
-    ) { innerPadding ->
-        ChangePasswordContent(
+    )
+    { innerPadding ->
+        SignUpScreenContent(
             uiState = uiState,
-            onOldPasswordChange = viewModel::onOldPasswordChange,
-            onNewPasswordChange = viewModel::onNewPasswordChange,
-            onConfirmPasswordChange = viewModel::onConfirmPasswordChange,
-            onUpdateClick = { viewModel.changePassword(navigateUp) },
+            onNameChange = viewModel::onNameChange,
+            onEmailChange = viewModel::onEmailChange,
+            onPasswordChange = viewModel::onPasswordChange,
+            onRepeatPasswordChange = viewModel::onRepeatPasswordChange,
+            onCreateAccountClick = { viewModel.onCreateAccountClick(openScreen) },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -65,14 +70,19 @@ fun ChangePasswordScreen(
 }
 
 @Composable
-fun ChangePasswordContent(
-    uiState: ChangePasswordUiState,
-    onOldPasswordChange: (String) -> Unit,
-    onNewPasswordChange: (String) -> Unit,
-    onConfirmPasswordChange: (String) -> Unit,
-    onUpdateClick: () -> Unit,
+fun SignUpScreenContent(
+    uiState: SignUpUiState,
+    onNameChange: (String) -> Unit,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onRepeatPasswordChange: (String) -> Unit,
+    onCreateAccountClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+
+    val enabled = !uiState.inProcess
+    val fieldModifier = Modifier.fieldModifier()
+
     Box(modifier = modifier){
         Column(
             modifier = Modifier
@@ -83,8 +93,6 @@ fun ChangePasswordContent(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            val fieldModifier = Modifier.fieldModifier()
-            val enabled = !uiState.inProcess
 
             Text(
                 text = stringResource(id = R.string.signup_title),
@@ -94,33 +102,43 @@ fun ChangePasswordContent(
 
             Spacer(modifier = Modifier.padding(20.dp))
 
-            PasswordField(
-                value = uiState.oldPassword,
-                onNewValue = onOldPasswordChange,
+            BasicField(
+                text = R.string.enter_name,
+                value = uiState.name,
+                onNewValue = onNameChange,
                 modifier = fieldModifier,
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
+                    keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
                 ),
-                placeholder = R.string.old_password,
+                enabled = enabled
+            )
+
+            EmailField(
+                value = uiState.email,
+                onNewValue = onEmailChange,
+                modifier = fieldModifier,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                ),
                 enabled = enabled
             )
 
             PasswordField(
-                value = uiState.newPassword,
-                onNewValue = onNewPasswordChange,
+                value = uiState.password,
+                onNewValue = onPasswordChange,
                 modifier = fieldModifier,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
                     imeAction = ImeAction.Next
                 ),
-                placeholder = R.string.new_password,
                 enabled = enabled
             )
 
             RepeatPasswordField(
-                value = uiState.confirmPassword,
-                onNewValue = onConfirmPasswordChange,
+                value = uiState.repeatPassword,
+                onNewValue = onRepeatPasswordChange,
                 modifier = fieldModifier,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
@@ -130,8 +148,8 @@ fun ChangePasswordContent(
             )
 
             BasicButton(
-                text = R.string.change_password,
-                action = onUpdateClick,
+                text = R.string.create_account,
+                action = onCreateAccountClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 40.dp),
@@ -147,5 +165,35 @@ fun ChangePasswordContent(
                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SignUpScreenPreview() {
+    ChatHubTheme {
+        SignUpScreenContent(
+            uiState = SignUpUiState(),
+            onNameChange = {},
+            onEmailChange = {},
+            onPasswordChange = {},
+            onRepeatPasswordChange = {},
+            onCreateAccountClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun SignUpScreenDarkPreview() {
+    ChatHubTheme(darkTheme = true) {
+        SignUpScreenContent(
+            uiState = SignUpUiState(),
+            onNameChange = {},
+            onEmailChange = {},
+            onPasswordChange = {},
+            onRepeatPasswordChange = {},
+            onCreateAccountClick = {}
+        )
     }
 }

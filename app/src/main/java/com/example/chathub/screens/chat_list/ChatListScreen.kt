@@ -1,4 +1,4 @@
-package com.example.chathub.screens
+package com.example.chathub.screens.chat_list
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -57,8 +57,6 @@ import com.example.chathub.ext.toolbarActions
 import com.example.chathub.model.ChatList
 import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.example.chathub.viewmodels.ChatListUiState
-import com.example.chathub.viewmodels.ChatListViewModel
 
 @Composable
 fun ChatListScreen(

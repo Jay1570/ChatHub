@@ -1,4 +1,4 @@
-package com.example.chathub.screens
+package com.example.chathub.screens.settings
 
 import android.content.Context
 import android.content.Intent
@@ -43,9 +43,8 @@ import com.example.chathub.common.BasicButton
 import com.example.chathub.common.BasicToolBar
 import com.example.chathub.ext.basicButton
 import com.example.chathub.model.Profile
+import com.example.chathub.screens.chat_list.ProfileImage
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.example.chathub.viewmodels.SettingsViewModel
-import com.example.chathub.viewmodels.Theme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

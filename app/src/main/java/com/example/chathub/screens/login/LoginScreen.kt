@@ -1,6 +1,6 @@
 @file:Suppress("DEPRECATION")
 
-package com.example.chathub.screens
+package com.example.chathub.screens.login
 
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -55,8 +55,6 @@ import com.example.chathub.ext.fieldModifier
 import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.example.chathub.viewmodels.LoginUiState
-import com.example.chathub.viewmodels.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException

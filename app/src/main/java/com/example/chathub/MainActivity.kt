@@ -8,7 +8,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.example.chathub.viewmodels.Theme
+import com.example.chathub.screens.settings.Theme
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 

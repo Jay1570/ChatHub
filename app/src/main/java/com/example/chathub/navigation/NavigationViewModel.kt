@@ -1,9 +1,8 @@
-package com.example.chathub.viewmodels
+package com.example.chathub.navigation
 
 import com.example.chathub.ChatAppViewModel
 import com.example.chathub.model.service.AccountService
 import com.example.chathub.model.service.LogService
-import com.example.chathub.navigation.DestinationScreen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 

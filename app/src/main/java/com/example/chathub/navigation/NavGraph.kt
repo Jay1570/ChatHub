@@ -7,14 +7,13 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.chathub.ApplicationState
-import com.example.chathub.screens.ChangePasswordScreen
-import com.example.chathub.screens.ChatListScreen
-import com.example.chathub.screens.ChatScreen
-import com.example.chathub.screens.LoginScreen
-import com.example.chathub.screens.ProfileScreen
-import com.example.chathub.screens.SettingsScreen
-import com.example.chathub.screens.SignUpScreen
-import com.example.chathub.viewmodels.NavigationViewModel
+import com.example.chathub.screens.change_password.ChangePasswordScreen
+import com.example.chathub.screens.chat.ChatScreen
+import com.example.chathub.screens.chat_list.ChatListScreen
+import com.example.chathub.screens.login.LoginScreen
+import com.example.chathub.screens.profile.ProfileScreen
+import com.example.chathub.screens.settings.SettingsScreen
+import com.example.chathub.screens.sign_up.SignUpScreen
 
 @Composable
 fun Navigation(

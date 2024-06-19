@@ -1,4 +1,4 @@
-package com.example.chathub.screens
+package com.example.chathub.screens.chat
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -51,10 +51,9 @@ import com.example.chathub.R
 import com.example.chathub.ext.formatTime
 import com.example.chathub.model.Chat
 import com.example.chathub.model.Profile
+import com.example.chathub.screens.chat_list.ProfileImage
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.example.chathub.viewmodels.ChatUiState
-import com.example.chathub.viewmodels.ChatViewModel
-import com.example.chathub.viewmodels.Theme
+import com.example.chathub.screens.settings.Theme
 import com.google.firebase.Timestamp
 
 

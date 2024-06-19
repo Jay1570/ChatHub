@@ -1,4 +1,4 @@
-package com.example.chathub.viewmodels
+package com.example.chathub.screens.sign_up
 
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope

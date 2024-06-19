@@ -1,4 +1,4 @@
-package com.example.chathub.viewmodels
+package com.example.chathub.screens.profile
 
 import android.net.Uri
 import android.util.Log

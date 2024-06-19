@@ -1,4 +1,4 @@
-package com.example.chathub.viewmodels
+package com.example.chathub.screens.settings
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
