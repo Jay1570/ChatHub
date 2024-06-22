@@ -1,4 +1,4 @@
-package com.example.chathub.model.module
+package com.example.chathub.module
 
 import android.content.Context
 import com.example.chathub.ThemePreferenceManager

@@ -8,8 +8,8 @@ import com.example.chathub.ChatAppViewModel
 import com.example.chathub.ThemePreferenceManager
 import com.example.chathub.model.Chat
 import com.example.chathub.model.Profile
-import com.example.chathub.model.service.ChatService
-import com.example.chathub.model.service.LogService
+import com.example.chathub.service.ChatService
+import com.example.chathub.service.LogService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

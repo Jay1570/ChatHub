@@ -1,11 +1,10 @@
-package com.example.chathub.model.service
+package com.example.chathub.service
 
 import android.content.Context
 import android.net.Uri
 import android.util.Log
 import com.example.chathub.R
 import com.example.chathub.model.Profile
-import com.example.chathub.model.trace
 import com.example.chathub.snackbar.SnackbarManager
 import com.example.chathub.snackbar.SnackbarMessage
 import com.google.android.gms.auth.api.signin.GoogleSignIn

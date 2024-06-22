@@ -9,7 +9,7 @@ import androidx.navigation.navArgument
 import com.example.chathub.ApplicationState
 import com.example.chathub.screens.change_password.ChangePasswordScreen
 import com.example.chathub.screens.chat.ChatScreen
-import com.example.chathub.screens.chat_list.ChatListScreen
+import com.example.chathub.screens.home.HomeScreen
 import com.example.chathub.screens.login.LoginScreen
 import com.example.chathub.screens.profile.ProfileScreen
 import com.example.chathub.screens.settings.SettingsScreen
@@ -38,7 +38,7 @@ fun Navigation(
         }
 
         composable(route = DestinationScreen.ChatList.route) {
-            ChatListScreen(
+            HomeScreen(
                 openScreen = { route -> appState.navigate(route) }
             )
         }

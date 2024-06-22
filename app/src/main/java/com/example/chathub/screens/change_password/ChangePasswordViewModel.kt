@@ -6,8 +6,8 @@ import com.example.chathub.ChatAppViewModel
 import com.example.chathub.R
 import com.example.chathub.ext.isValidPassword
 import com.example.chathub.ext.passwordMatches
-import com.example.chathub.model.service.AccountService
-import com.example.chathub.model.service.LogService
+import com.example.chathub.service.AccountService
+import com.example.chathub.service.LogService
 import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch

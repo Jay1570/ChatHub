@@ -1,4 +1,4 @@
-package com.example.chathub.screens.chat_list
+package com.example.chathub.screens.home
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
 import com.example.chathub.R
 import com.example.chathub.model.Profile
-import com.example.chathub.model.service.AccountService
-import com.example.chathub.model.service.ChatService
-import com.example.chathub.model.service.LogService
 import com.example.chathub.navigation.DestinationScreen
+import com.example.chathub.service.AccountService
+import com.example.chathub.service.ChatService
+import com.example.chathub.service.LogService
 import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ChatListViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     private val accountService: AccountService,
     private val chatService: ChatService,
     logService: LogService
@@ -30,7 +30,7 @@ class ChatListViewModel @Inject constructor(
     private val _userList = MutableStateFlow<List<Profile>>(emptyList())
     val userList: StateFlow<List<Profile>> get() = _userList
 
-    var uiState = mutableStateOf(ChatListUiState())
+    var uiState = mutableStateOf(HomeUiState())
         private set
 
     val unreadMessageCounts = chatService.unreadMessageCount
@@ -85,7 +85,7 @@ class ChatListViewModel @Inject constructor(
     }
 }
 
-data class ChatListUiState(
+data class HomeUiState(
     val query: String = "",
     val currentUserId: String = "",
     val isSearchBarVisible: Boolean = false

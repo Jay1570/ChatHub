@@ -6,8 +6,8 @@ import com.example.chathub.R
 import com.example.chathub.ext.isValidEmail
 import com.example.chathub.ext.isValidPassword
 import com.example.chathub.model.Profile
-import com.example.chathub.model.service.AccountService
-import com.example.chathub.model.service.LogService
+import com.example.chathub.service.AccountService
+import com.example.chathub.service.LogService
 import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount

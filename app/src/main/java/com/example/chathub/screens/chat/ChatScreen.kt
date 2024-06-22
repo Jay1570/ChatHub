@@ -51,7 +51,7 @@ import com.example.chathub.R
 import com.example.chathub.ext.formatTime
 import com.example.chathub.model.Chat
 import com.example.chathub.model.Profile
-import com.example.chathub.screens.chat_list.ProfileImage
+import com.example.chathub.screens.home.ProfileImage
 import com.example.chathub.ui.theme.ChatHubTheme
 import com.example.chathub.screens.settings.Theme
 import com.google.firebase.Timestamp

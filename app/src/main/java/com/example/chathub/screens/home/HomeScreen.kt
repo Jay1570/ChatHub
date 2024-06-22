@@ -1,4 +1,4 @@
-package com.example.chathub.screens.chat_list
+package com.example.chathub.screens.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -59,9 +59,9 @@ import com.example.chathub.model.Profile
 import com.example.chathub.ui.theme.ChatHubTheme
 
 @Composable
-fun ChatListScreen(
+fun HomeScreen(
     openScreen: (String) -> Unit,
-    viewModel: ChatListViewModel = hiltViewModel()
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val chatList = viewModel.chatList.collectAsStateWithLifecycle(emptyList(), lifecycleOwner.lifecycle)
@@ -81,7 +81,7 @@ fun ChatListScreen(
         }
     ) { innerPadding ->
         if(!uiState.isSearchBarVisible){
-            ChatListContent(
+            HomeScreenContent(
                 uiState = uiState,
                 chatList = chatList.value,
                 onChatClick = viewModel::onChatClick,
@@ -93,7 +93,7 @@ fun ChatListScreen(
                     .fillMaxSize()
             )
         } else {
-            ChatListContent(
+            HomeScreenContent(
                 uiState = uiState,
                 userList = userList,
                 onUserClick = viewModel::onUserClick,
@@ -107,8 +107,8 @@ fun ChatListScreen(
 }
 
 @Composable
-fun ChatListContent(
-    uiState: ChatListUiState,
+fun HomeScreenContent(
+    uiState: HomeUiState,
     openScreen: (String) -> Unit,
     modifier: Modifier = Modifier,
     userList: List<Profile> = emptyList(),
@@ -128,7 +128,7 @@ fun ChatListContent(
                     val profiles =
                         if (chat.user1Id != uiState.currentUserId) profile.find { it.userId == chat.user1Id } ?: Profile()
                         else profile.find { it.userId == chat.user2Id } ?: Profile()
-                    ChatListItem(
+                    UserItem(
                         uiState = uiState,
                         chatId = chat.chatId,
                         unreadCount = unreadCount[chat.chatId] ?: 0,
@@ -142,7 +142,7 @@ fun ChatListContent(
             LazyColumn {
                 items(userList) { profiles ->
                     if (profiles.userId != uiState.currentUserId) {
-                        ChatListItem(
+                        UserItem(
                             uiState = uiState,
                             profile = profiles,
                             onUserClick = onUserClick,
@@ -156,8 +156,8 @@ fun ChatListContent(
 }
 
 @Composable
-fun ChatListItem(
-    uiState: ChatListUiState,
+fun UserItem(
+    uiState: HomeUiState,
     chatId: String = "",
     profile: Profile,
     openScreen: (String) -> Unit,
@@ -224,7 +224,7 @@ fun ProfileImage(imageUrl: String, size: Dp) {
 
 @Composable
 fun SearchBar(
-    uiState: ChatListUiState,
+    uiState: HomeUiState,
     modifier: Modifier = Modifier,
     onSearch: (String) -> Unit,
     onCloseClick: () -> Unit
@@ -263,7 +263,7 @@ fun SearchBar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AppBar(
-    uiState: ChatListUiState,
+    uiState: HomeUiState,
     onSettingsClick: () -> Unit,
     onSearchClick: () -> Unit,
     onSearch: (String) -> Unit
@@ -339,9 +339,9 @@ fun ChatListScreenPreview() {
         "120" to 0
     )
     ChatHubTheme {
-        ChatListContent(
+        HomeScreenContent(
             chatList = chatList,
-            uiState = ChatListUiState(),
+            uiState = HomeUiState(),
             openScreen = {},
             unreadCount = unreadCount
         )
@@ -368,9 +368,9 @@ fun ChatListScreenDarkPreview() {
         "120" to 0
     )
     ChatHubTheme(darkTheme = true) {
-        ChatListContent(
+        HomeScreenContent(
             chatList = chatList,
-            uiState = ChatListUiState(),
+            uiState = HomeUiState(),
             openScreen = {},
             unreadCount = unreadCount
         )
@@ -382,7 +382,7 @@ fun ChatListScreenDarkPreview() {
 fun SearchBarPreview() {
     ChatHubTheme {
         SearchBar(
-            uiState = ChatListUiState(),
+            uiState = HomeUiState(),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),

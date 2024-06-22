@@ -1,4 +1,4 @@
-package com.example.chathub.model.module
+package com.example.chathub.module
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth

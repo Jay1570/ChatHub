@@ -1,4 +1,4 @@
-package com.example.chathub.model
+package com.example.chathub.service
 
 import com.google.firebase.perf.metrics.Trace
 import com.google.firebase.perf.trace

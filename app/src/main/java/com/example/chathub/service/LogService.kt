@@ -1,4 +1,4 @@
-package com.example.chathub.model.service
+package com.example.chathub.service
 
 import com.google.firebase.Firebase
 import com.google.firebase.crashlytics.crashlytics

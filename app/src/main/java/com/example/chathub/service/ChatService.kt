@@ -1,4 +1,4 @@
-package com.example.chathub.model.service
+package com.example.chathub.service
 
 import android.util.Log
 import com.example.chathub.model.Chat
