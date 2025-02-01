@@ -1,38 +1,14 @@
-@file:Suppress("DEPRECATION")
-
 package com.example.chathub.screens.login
 
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DividerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -43,61 +19,51 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.chathub.R
-import com.example.chathub.common.BasicButton
-import com.example.chathub.common.BasicTextButton
-import com.example.chathub.common.BasicToolBar
-import com.example.chathub.common.EmailField
-import com.example.chathub.common.PasswordField
+import com.example.chathub.common.*
 import com.example.chathub.ext.basicButton
 import com.example.chathub.ext.fieldModifier
-import com.example.chathub.navigation.DestinationScreen
+import com.example.chathub.navigation.Routes
+import com.example.chathub.navigation.SignUp
 import com.example.chathub.snackbar.SnackbarManager
 import com.example.chathub.ui.theme.ChatHubTheme
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    openScreen: (String) -> Unit,
-    openAndPopUp: (String, String) -> Unit,
+    openScreen: (Routes) -> Unit,
+    openAndPopUp: (Routes, Routes) -> Unit,
     viewModel: LoginViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState
     val context = LocalContext.current
+    val credentialManager = CredentialManager.create(context)
+    val coroutineScope = rememberCoroutineScope()
 
-    val googleSignInOptions = remember {
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(context.getString(R.string.web_client_id))
-            .requestEmail()
-            .build()
-    }
-    val googleSignInClient = remember {
-        GoogleSignIn.getClient(context, googleSignInOptions)
-    }
+    val googleIdOption: GetSignInWithGoogleOption = GetSignInWithGoogleOption.Builder(context.getString(R.string.web_client_id)).build()
 
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+    val request: GetCredentialRequest = GetCredentialRequest.Builder()
+        .addCredentialOption(googleIdOption)
+        .build()
+
+    fun signInWithGoogle() {
+        coroutineScope.launch {
             try {
-                val account = task.getResult(ApiException::class.java)
-                viewModel.onGoogleLoginClick(account, openAndPopUp)
-            } catch (e: ApiException) {
+                val result = credentialManager.getCredential(request = request, context = context)
+                val credential = result.credential
+                val googleIdCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                viewModel.onGoogleLoginClick(googleIdCredential, openAndPopUp)
+            } catch (e: Exception) {
                 SnackbarManager.showMessage(R.string.google_sign_in_failed)
             }
-        } else {
-            SnackbarManager.showMessage(R.string.google_sign_in_failed)
         }
-   }
-    fun signInWithGoogle() {
-        val signInIntent = googleSignInClient.signInIntent
-        googleSignInLauncher.launch(signInIntent)
     }
 
     Scaffold(
@@ -111,7 +77,7 @@ fun LoginScreen(
             onPasswordChange = viewModel::onPasswordChange,
             onGoogleLoginClick = { signInWithGoogle() },
             onLoginClick = { viewModel.onSignInClick(openAndPopUp) },
-            onNoAccountClick = { openScreen(DestinationScreen.SignUp.route) },
+            onNoAccountClick = { openScreen(SignUp) },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)

@@ -3,12 +3,13 @@ package com.example.chathub.screens.settings
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.chathub.ChatAppViewModel
-import com.example.chathub.R
-import com.example.chathub.ThemePreferenceManager
+import com.example.chathub.*
+import com.example.chathub.navigation.ChangePassword
+import com.example.chathub.navigation.Login
+import com.example.chathub.navigation.Profile
+import com.example.chathub.navigation.Routes
 import com.example.chathub.service.AccountService
 import com.example.chathub.service.LogService
-import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
@@ -38,11 +39,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun signOut(context: Context, openAndPopUp: (String) -> Unit) {
+    fun signOut(context: Context, openAndPopUp: (Routes) -> Unit) {
         viewModelScope.launch {
             accountService.signOut(context)
         }.invokeOnCompletion {
-            openAndPopUp(DestinationScreen.Login.route)
+            openAndPopUp(Login)
         }
     }
 
@@ -68,16 +69,16 @@ class SettingsViewModel @Inject constructor(
         uiState.value = uiState.value.copy(currentTheme = theme, isThemeDialogVisible = false)
     }
 
-    fun onProfileClick(openScreen: (String) -> Unit){
-        openScreen(DestinationScreen.Profile.route)
+    fun onProfileClick(openScreen: (Routes) -> Unit){
+        openScreen(Profile)
     }
 
-    fun onAccountSecurityClick(context: Context, openScreen: (String) -> Unit){
+    fun onAccountSecurityClick(context: Context, openScreen: (Routes) -> Unit){
         if (accountService.isSignedInWithGoogle(context)) {
             SnackbarManager.showMessage(R.string.change_password_google_error)
             return
         }
-        openScreen(DestinationScreen.ChangePassword.route)
+        openScreen(ChangePassword)
     }
 }
 

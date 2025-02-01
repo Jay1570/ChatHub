@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import com.example.chathub.ChatAppViewModel
+import com.example.chathub.navigation.ChatRoute
 import com.example.chathub.ThemePreferenceManager
 import com.example.chathub.model.Chat
 import com.example.chathub.model.Profile
@@ -27,7 +29,7 @@ class ChatViewModel @Inject constructor(
 
     val uiState = mutableStateOf(ChatUiState())
 
-    private var sessionId: String = checkNotNull(savedStateHandle["chatId"])
+    private var sessionId: String = checkNotNull(savedStateHandle.toRoute<ChatRoute>().id)
 
     private val _chats = MutableStateFlow<List<Chat>>(emptyList())
     val chats: StateFlow<List<Chat>> get() = _chats
@@ -36,7 +38,6 @@ class ChatViewModel @Inject constructor(
     val theme = themePreferenceManager.theme
 
     init {
-        sessionId = checkNotNull(savedStateHandle["chatId"])
         uiState.value = uiState.value.copy(currentUserId =  chatService.currentUserId)
         loadProfile()
         loadChats(sessionId)

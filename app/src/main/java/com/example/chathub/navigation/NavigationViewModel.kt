@@ -11,11 +11,11 @@ class NavigationViewModel @Inject constructor(
     private val accountService: AccountService,
     logService: LogService
 ) : ChatAppViewModel(logService) {
-    fun checkUserStatus() : String {
+    fun checkUserStatus() : Routes {
         return if (accountService.hasUser) {
-            DestinationScreen.ChatList.route
+            Home
         } else {
-            DestinationScreen.Login.route
+            Login
         }
     }
 }

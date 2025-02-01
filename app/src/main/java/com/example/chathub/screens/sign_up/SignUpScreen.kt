@@ -30,6 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.chathub.R
+import com.example.chathub.navigation.Routes
 import com.example.chathub.common.BasicButton
 import com.example.chathub.common.BasicField
 import com.example.chathub.common.BasicToolBar
@@ -42,7 +43,7 @@ import com.example.chathub.ui.theme.ChatHubTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignUpScreen(
-    openScreen: (String) -> Unit,
+    openScreen: (Routes) -> Unit,
     navigateUp: () -> Unit,
     viewModel: SignUpViewModel = hiltViewModel()
 ) {

@@ -4,26 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,14 +15,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.chathub.R
+import com.example.chathub.navigation.Routes
 import com.example.chathub.common.BasicButton
 import com.example.chathub.common.BasicToolBar
 import com.example.chathub.ext.basicButton
@@ -49,9 +34,9 @@ import com.example.chathub.ui.theme.ChatHubTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    openAndClear: (String) -> Unit,
+    openAndClear: (Routes) -> Unit,
     navigateUp: () -> Unit,
-    openScreen: (String) -> Unit,
+    openScreen: (Routes) -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
 
@@ -91,13 +76,13 @@ fun SettingsScreen(
 fun SettingsScreenContent(
     profile: Profile,
     modifier: Modifier = Modifier,
-    onSignOutClick: (Context, (String) -> Unit) -> Unit,
+    onSignOutClick: (Context, (Routes) -> Unit) -> Unit,
     onProfileClick: () -> Unit,
     onAccountSecurityClick: () -> Unit,
     onThemeClick: () -> Unit,
     isDynamicColorEnabled: Boolean,
     onDynamicColorsSwitchChange: (Boolean) -> Unit,
-    openAndClear: (String) -> Unit
+    openAndClear: (Routes) -> Unit
 ) {
     val context = LocalContext.current
     Column(modifier = modifier){

@@ -1,13 +1,28 @@
 package com.example.chathub.navigation
 
-sealed class DestinationScreen(var route: String) {
-    object Login: DestinationScreen("login")
-    object SignUp: DestinationScreen("signup")
-    object Profile: DestinationScreen("profile")
-    object ChatList: DestinationScreen("chatList")
-    object Chat: DestinationScreen("chat/{chatId}") {
-        fun createRoute(id: String?) = "chat/$id"
-    }
-    object Settings: DestinationScreen("settings")
-    object ChangePassword: DestinationScreen("changePassword")
-}
+import kotlinx.serialization.Serializable
+
+sealed interface Routes
+
+@Serializable
+data object Login : Routes
+
+@Serializable
+data object SignUp : Routes
+
+@Serializable
+data object Profile : Routes
+
+@Serializable
+data object Home : Routes
+
+@Serializable
+data class ChatRoute(
+    val id: String?
+) : Routes
+
+@Serializable
+data object Settings : Routes
+
+@Serializable
+data object ChangePassword : Routes

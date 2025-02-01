@@ -1,34 +1,38 @@
 [versions]
-agp = "8.5.0"
-firebaseAnalytics = "22.0.2"
-firebaseBom = "33.1.1"
-firebaseConfig = "22.0.0"
-firebaseCrashlytics = "19.0.2"
-firebaseFirestore = "25.0.0"
-firebaseMessaging = "24.0.0"
-firebasePerf = "21.0.1"
-hiltCompiler = "2.51.1"
-kotlin = "2.0.0"
-coreKtx = "1.13.1"
+agp = "8.8.0"
+firebaseAnalytics = "22.2.0"
+firebaseBom = "33.8.0"
+firebaseConfig = "22.1.0"
+firebaseCrashlytics = "19.4.0"
+firebaseFirestore = "25.1.1"
+firebaseMessaging = "24.1.0"
+firebasePerf = "21.0.4"
+hiltCompiler = "2.55"
+kotlin = "2.1.10"
+coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.2"
-activityCompose = "1.9.0"
-composeBom = "2024.06.00"
-hiltAndroid = "2.51.1"
-hiltAndroidTesting = "2.51.1"
-firebaseAuth = "23.0.0"
-uiTextGoogleFonts = "1.6.8"
-navigationRuntimeKtx = "2.7.7"
-navigationCompose = "2.7.7"
+lifecycleRuntimeKtx = "2.8.7"
+activityCompose = "1.10.0"
+composeBom = "2025.01.01"
+hiltAndroid = "2.55"
+hiltAndroidTesting = "2.55"
+firebaseAuth = "23.1.0"
+uiTextGoogleFonts = "1.7.7"
+navigationRuntimeKtx = "2.8.6"
+navigationCompose = "2.8.6"
 hiltNavigationCompose = "1.2.0"
-playServicesAuth = "21.2.0"
-coilCompose = "2.6.0"
-lifecycleRuntimeCompose = "2.8.2"
-lifecycleRuntimeComposeAndroid = "2.8.2"
-firebaseStorage = "21.0.0"
-datastorePreferences = "1.1.1"
+playServicesAuth = "21.3.0"
+coilCompose = "2.7.0"
+lifecycleRuntimeCompose = "2.8.7"
+lifecycleRuntimeComposeAndroid = "2.8.7"
+firebaseStorage = "21.0.1"
+datastorePreferences = "1.1.2"
+credentials = "1.3.0"
+credentialsPlayServicesAuth = "1.3.0"
+googleid = "1.1.1"
+kotlinSerialization = "1.8.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -50,7 +54,7 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.6.8" }
+androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest", version = "1.7.7" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hiltAndroid" }
@@ -66,8 +70,13 @@ androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lif
 androidx-lifecycle-runtime-compose-android = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose-android", version.ref = "lifecycleRuntimeComposeAndroid" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage", version.ref = "firebaseStorage" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
+androidx-credentials = { group = "androidx.credentials", name = "credentials", version = "1.3.0" }
+androidx-credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

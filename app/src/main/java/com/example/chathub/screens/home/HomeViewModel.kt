@@ -3,10 +3,11 @@ package com.example.chathub.screens.home
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
-import com.example.chathub.ChatAppViewModel
-import com.example.chathub.R
+import com.example.chathub.*
 import com.example.chathub.model.Profile
-import com.example.chathub.navigation.DestinationScreen
+import com.example.chathub.navigation.ChatRoute
+import com.example.chathub.navigation.Routes
+import com.example.chathub.navigation.Settings
 import com.example.chathub.service.AccountService
 import com.example.chathub.service.ChatService
 import com.example.chathub.service.LogService
@@ -69,19 +70,19 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun onUserClick(userId: String, openScreen: (String) -> Unit) {
+    fun onUserClick(userId: String, openScreen: (Routes) -> Unit) {
         viewModelScope.launch{
             val chat = chatService.createChat(userId)
-            openScreen(DestinationScreen.Chat.createRoute(chat?.chatId))
+            openScreen(ChatRoute(chat?.chatId))
         }.invokeOnCompletion { uiState.value = uiState.value.copy(isSearchBarVisible = false) }
     }
 
-    fun onChatClick(chatId: String, openScreen: (String) -> Unit) {
-        openScreen(DestinationScreen.Chat.createRoute(chatId))
+    fun onChatClick(chatId: String, openScreen: (Routes) -> Unit) {
+        openScreen(ChatRoute(chatId))
     }
 
-    fun onSettingsClick(openScreen: (String) -> Unit) {
-        openScreen(DestinationScreen.Settings.route)
+    fun onSettingsClick(openScreen: (Routes) -> Unit) {
+        openScreen(Settings)
     }
 }
 

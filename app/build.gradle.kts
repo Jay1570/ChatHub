@@ -7,16 +7,17 @@ plugins {
     id("com.google.firebase.crashlytics")
     id("com.google.firebase.firebase-perf")
     id("dagger.hilt.android.plugin")
+    alias(libs.plugins.jetbrains.kotlin.serialization)
 }
 
 android {
     namespace = "com.example.chathub"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.chathub"
         minSdk = 24
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -46,9 +47,6 @@ android {
     buildFeatures {
         compose = true
     }
-    composeCompiler {
-        enableStrongSkippingMode = true
-    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -58,6 +56,7 @@ android {
 
 dependencies {
 
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -74,9 +73,11 @@ dependencies {
     implementation(libs.play.services.auth)
     implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.runtime.compose.android)
     implementation(libs.firebase.storage)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
     testImplementation(libs.junit)
     testImplementation(libs.hilt.android.testing)
     androidTestImplementation(libs.androidx.junit)

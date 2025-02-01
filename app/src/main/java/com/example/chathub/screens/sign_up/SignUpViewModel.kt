@@ -3,14 +3,15 @@ package com.example.chathub.screens.sign_up
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewModelScope
 import com.example.chathub.ChatAppViewModel
+import com.example.chathub.navigation.Home
 import com.example.chathub.R
+import com.example.chathub.navigation.Routes
 import com.example.chathub.ext.isValidEmail
 import com.example.chathub.ext.isValidPassword
 import com.example.chathub.ext.passwordMatches
 import com.example.chathub.model.Profile
 import com.example.chathub.service.AccountService
 import com.example.chathub.service.LogService
-import com.example.chathub.navigation.DestinationScreen
 import com.example.chathub.snackbar.SnackbarManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ class SignUpViewModel @Inject constructor(
         uiState.value = uiState.value.copy(repeatPassword = newValue)
     }
 
-    fun onCreateAccountClick(openScreen: (String) -> Unit) {
+    fun onCreateAccountClick(openScreen: (Routes) -> Unit) {
         if (name.isBlank() || email.isBlank() || password.isBlank() || repeatPassword.isBlank()) {
             SnackbarManager.showMessage(R.string.all_fields_required)
             return
@@ -69,7 +70,7 @@ class SignUpViewModel @Inject constructor(
                 accountService.createAccount(name, email, password)
                 accountService.storeProfile(Profile(name = name, email = email))
                 SnackbarManager.showMessage(R.string.account_created)
-                openScreen(DestinationScreen.ChatList.route)
+                openScreen(Home)
             } catch (e: Exception) {
                 SnackbarManager.showMessage(R.string.signup_failed)
             } finally {

@@ -3,12 +3,13 @@ package com.example.chathub.service
 import android.content.Context
 import android.net.Uri
 import android.util.Log
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.CredentialManager
 import com.example.chathub.R
 import com.example.chathub.model.Profile
 import com.example.chathub.snackbar.SnackbarManager
 import com.example.chathub.snackbar.SnackbarMessage
 import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -20,7 +21,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
-@Suppress("DEPRECATION")
 class AccountService @Inject constructor(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore
@@ -75,13 +75,8 @@ class AccountService @Inject constructor(
     }
 
     suspend fun signOut(context: Context) {
-
-        val signInClient = GoogleSignIn.getClient(context, GoogleSignInOptions.DEFAULT_SIGN_IN)
-        val account = GoogleSignIn.getLastSignedInAccount(context)
-
-        if (account != null) {
-            signInClient.signOut().await()
-        }
+        val credentialManager = CredentialManager.create(context)
+        credentialManager.clearCredentialState(ClearCredentialStateRequest())
         auth.signOut()
     }
 
