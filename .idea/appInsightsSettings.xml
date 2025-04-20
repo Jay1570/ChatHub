@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AppInsightsSettings">
-    <option name="selectedTabId" value="Firebase Crashlytics" />
     <option name="tabSettings">
       <map>
         <entry key="Firebase Crashlytics">
@@ -9,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.chathub" />
-                  <option name="mobileSdkAppId" value="1:212274517162:android:89a8373eca5f890a7c6cd3" />
+                  <option name="appId" value="com.example.chathub_android" />
+                  <option name="mobileSdkAppId" value="1:212274517162:android:9c4e56ea3dd22dc07c6cd3" />
                   <option name="projectId" value="chathub-cc672" />
                   <option name="projectNumber" value="212274517162" />
                 </ConnectionSetting>

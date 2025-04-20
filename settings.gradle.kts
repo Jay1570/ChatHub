@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ChatHub"
+rootProject.name = "ChatHub-Android"
 include(":app")
